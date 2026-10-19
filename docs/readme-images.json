@@ -1,5 +1,5 @@
 {
-  "$comment": "Content of the README pictures. Cards: node sh1ft-w.github.io/theme/v1/readme-images/render.mjs <this repo> cards. The README title image is docs/images/readme-title.webp, a finished image used unchanged for light and dark (currently a placeholder); the title block here is not used for it. docs/images/stage-photo.jpg is the photo part for the website hero (currently a placeholder).",
+  "$comment": "Content of the README pictures. Cards: node sh1ft-w.github.io/theme/v1/readme-images/render.mjs <this repo> cards. The README title image is docs/images/readme-title.webp, a finished image used unchanged for light and dark (currently a placeholder); the title block here is not used for it. The project page shows the same image in the hero. docs/images/stage-photo.jpg (a placeholder) is only referenced by the unused title block.",
   "title": {
     "name": "Ring Intercom Plus",
     "eyebrow": "For Home Assistant",

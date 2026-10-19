@@ -66,4 +66,5 @@ Projektseite (`docs/index.html`) lesen die manifest.json selbst.
 - Testdaten sind fiktiv (Geräte-ID `123456`, Profil-ID `98765`, MAC `aa:bb:cc:dd:ee:ff`, Gerät „Front Door“).
 - README-Bilder: Karten aus `docs/readme-images.json`, gerendert mit `theme/v1/readme-images/render.mjs <repo> cards`
   aus sh1ft-w.github.io. Titelbild: `docs/images/readme-title.webp` (fertiges Bild, unverändert für hell und dunkel;
-  derzeit Platzhalter); `docs/images/stage-photo.jpg` ist sein Fotoausschnitt für die Projektseite (derzeit Platzhalter).
+  derzeit Platzhalter); die Projektseite zeigt dasselbe Bild im Hero.
+  `docs/images/stage-photo.jpg` (Platzhalter) steht nur noch im ungenutzten title-Block der readme-images.json.

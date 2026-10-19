@@ -1,0 +1,125 @@
+# Integration Quality Scale, selbst geprüft (keine Core-Integration, die Stufe ist nicht offiziell).
+# Regeln: https://developers.home-assistant.io/docs/core/integration-quality-scale/rules
+# Ehrlich eingeschätzt: Silber erreicht, Gold mit Lücken (keine Diagnose, keine Erkennung, kein Neu-Konfigurieren).
+rules:
+  # Bronze
+  action-setup:
+    status: exempt
+    comment: Keine eigenen Aktionen; alles läuft über Schloss, Schalter, Zahl und Knopf.
+  appropriate-polling:
+    status: done
+    comment: Einstellungen alle 5 Minuten und nach jeder Änderung; Klingeln/Entsperren kommen als Ereignisse der Ring-Integration, „Anruf aktiv“ nur nach einem Klingeln (alle 10 s, höchstens 3 Minuten).
+  brands: done
+  common-modules:
+    status: done
+    comment: DataUpdateCoordinator in coordinator.py, gemeinsame Basis mit Fehler-Wrapper in entity.py, Cloud-Aufrufe ohne HA in api.py.
+  config-flow-test-coverage: done
+  config-flow:
+    status: done
+    comment: Ohne Eingaben; Anmeldung kommt von der Ring-Integration. Optionen für die PIN des Türöffners.
+  dependency-transparency:
+    status: exempt
+    comment: Keine eigenen Abhängigkeiten; nutzt das Ring-Objekt (ring_doorbell) der HA-Ring-Integration.
+  docs-actions:
+    status: exempt
+    comment: Keine eigenen Aktionen.
+  docs-triggers:
+    status: exempt
+    comment: Keine eigenen Auslöser.
+  docs-conditions:
+    status: exempt
+    comment: Keine eigenen Bedingungen.
+  docs-high-level-description: done
+  docs-installation-instructions: done
+  docs-removal-instructions: done
+  entity-event-setup:
+    status: done
+    comment: Zustands- und Registry-Listener hängen am Eintrag (async_on_unload), Timer werden beim Entladen abgeräumt.
+  entity-unique-id: done
+  has-entity-name: done
+  runtime-data: done
+  test-before-configure:
+    status: exempt
+    comment: Nichts einzugeben; geprüft wird nur, ob die Ring-Integration eingerichtet ist.
+  test-before-setup:
+    status: done
+    comment: Ohne geladene Ring-Integration oder bei verändertem Aufbau ConfigEntryNotReady.
+  unique-config-entry:
+    status: done
+    comment: single_config_entry.
+
+  # Silver
+  action-exceptions:
+    status: done
+    comment: Befehlsfehler werden als übersetzte HomeAssistantError gemeldet (entity.py _run), falsche PIN als ServiceValidationError.
+  config-entry-unloading: done
+  docs-configuration-parameters:
+    status: done
+    comment: Option PIN im README.
+  docs-installation-parameters:
+    status: exempt
+    comment: Keine Parameter bei der Einrichtung.
+  entity-unavailable:
+    status: done
+    comment: Scheitert die Einstellungs-Abfrage (z. B. Ring entladen), sind die Entitäten nicht verfügbar; lädt Ring neu, lädt Ring Intercom Plus nach.
+  integration-owner: done
+  log-when-unavailable:
+    status: done
+    comment: Über den DataUpdateCoordinator (einmal beim Ausfall, einmal bei Rückkehr).
+  parallel-updates: done
+  reauthentication-flow:
+    status: exempt
+    comment: Keine eigene Anmeldung; die macht die Ring-Integration.
+  test-coverage: done
+
+  # Gold
+  devices:
+    status: done
+    comment: Entitäten hängen am vorhandenen Gerät der Ring-Integration (device_entry), kein zweites Gerät.
+  diagnostics:
+    status: todo
+    comment: Noch kein Diagnose-Download.
+  discovery-update-info:
+    status: exempt
+    comment: Keine Erkennung; die Geräte kommen aus der Ring-Integration.
+  discovery:
+    status: exempt
+    comment: Siehe discovery-update-info.
+  docs-data-update: done
+  docs-examples:
+    status: todo
+    comment: Noch keine Automationsbeispiele im README.
+  docs-known-limitations: done
+  docs-supported-devices: done
+  docs-supported-functions: done
+  docs-troubleshooting: done
+  docs-use-cases: done
+  dynamic-devices:
+    status: todo
+    comment: Eine neue Intercom in der Ring-Integration braucht ein Neuladen von Ring Intercom Plus (passiert automatisch, wenn Ring neu lädt).
+  entity-category: done
+  entity-device-class: done
+  entity-disabled-by-default:
+    status: exempt
+    comment: Wenige Entitäten, keine lauten Werte.
+  entity-translations: done
+  exception-translations: done
+  icon-translations: done
+  reconfiguration-flow:
+    status: exempt
+    comment: Nichts zu konfigurieren außer der PIN (Optionen).
+  repair-issues:
+    status: exempt
+    comment: Kein Zustand, den der Nutzer selbst beheben müsste; fehlt Ring, bleibt der Eintrag in „wird erneut versucht“.
+  stale-devices:
+    status: exempt
+    comment: Geräte gehören der Ring-Integration; verschwindet eine Intercom dort, verschwinden ihre Entitäten mit dem Gerät.
+
+  # Platinum
+  async-dependency:
+    status: done
+    comment: Nutzt das asynchrone Ring-Objekt der HA-Ring-Integration.
+  inject-websession:
+    status: exempt
+    comment: Keine eigene Verbindung; die Session gehört der Ring-Integration.
+  strict-typing: done

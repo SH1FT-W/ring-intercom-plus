@@ -1,0 +1,64 @@
+{
+  "$comment": "Content of the README pictures. Cards: node sh1ft-w.github.io/theme/v1/readme-images/render.mjs <this repo> cards. The README title image is docs/images/readme-title.webp, a finished image used unchanged for light and dark (currently a placeholder); the title block here is not used for it. docs/images/stage-photo.jpg is the photo part for the website hero (currently a placeholder).",
+  "title": {
+    "name": "Ring Intercom Plus",
+    "eyebrow": "For Home Assistant",
+    "lead": "Your Ring Intercom, <em>with the missing switches.</em>",
+    "sub": "Door opener, ding, call active, Ring-to-Open, unlock duration and restart for the Ring Intercom, next to the official Ring integration.",
+    "pills": [["Ring Intercom"], ["Optional PIN", "v"], ["HACS"]],
+    "logo": "docs/images/readme-icon.png",
+    "shot": {
+      "light": "docs/images/stage-photo.jpg",
+      "dark": "docs/images/stage-photo.jpg",
+      "srcW": 1120, "winW": 1120, "s": 0.64,
+      "strips": [[0, 1000]],
+      "bar": null, "left": 560, "top": 0, "flat": true
+    }
+  },
+  "colors": {
+    "light": {
+      "bg": "#F3F8FB", "bg2": "#E6F0F6", "ink": "#0D1A24", "ink2": "#475A68", "ink3": "#7D8F9C",
+      "accentText": "#0E6B9E", "accent": "#1998D5", "accent2": "#5BC0EE",
+      "glow1": "rgba(25,152,213,0.14)", "glow2": "rgba(10,70,110,0.08)", "frame": "rgba(5,40,65,0.10)",
+      "pillBg": "#ffffff", "pillLine": "rgba(5,40,65,0.08)", "win": "#06131c", "bar": ""
+    },
+    "dark": {
+      "bg": "#07121A", "bg2": "#0C1B26", "ink": "#EAF3F9", "ink2": "rgba(220,234,244,0.84)", "ink3": "rgba(220,234,244,0.52)",
+      "accentText": "#6CC8F3", "accent": "#3BB0E8", "accent2": "#1998D5",
+      "glow1": "rgba(59,176,232,0.18)", "glow2": "rgba(10,80,130,0.18)", "frame": "rgba(255,255,255,0.10)",
+      "pillBg": "rgba(255,255,255,0.06)", "pillLine": "rgba(255,255,255,0.10)", "win": "#06131c", "bar": ""
+    }
+  },
+  "fonts": {
+    "display": "\"Archivo\", -apple-system, system-ui, sans-serif",
+    "body": "\"Inter\", -apple-system, system-ui, sans-serif",
+    "mono": "\"JetBrains Mono\", ui-monospace, Menlo, monospace",
+    "google": "https://fonts.googleapis.com/css2?family=Archivo:wght@700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap"
+  },
+  "cards": {
+    "features": [
+      {"icon": "lock-open-variant-outline", "title": "Door opener", "text": "A lock entity that buzzes the door open and shows \"unlocked\" for 5 seconds, also when the door is opened from the Ring app."},
+      {"icon": "form-textbox-password", "title": "Optional PIN", "text": "With a PIN of 4 to 8 digits the lock opens only with the right code, in dashboards, automations and voice assistants alike."},
+      {"icon": "bell-ring-outline", "title": "Ding and call active", "text": "A ding sensor that stays on for 20 seconds and a call sensor that follows the conversation for up to 3 minutes."},
+      {"icon": "tune-variant", "title": "Settings of the app", "text": "Ring-to-Open, unlock duration (1 to 10 s, analog systems) and a restart button, read every 5 minutes and after each change."},
+      {"icon": "link-variant", "title": "Uses the Ring integration", "text": "No second login and no second push connection: rings and unlocks come from the event entities of the official integration."},
+      {"icon": "flask-outline", "title": "Next ring opens", "text": "Experimental: the next ring within 60 seconds opens the door. Taken from the guest access of the Ring app."}
+    ],
+    "entities": [
+      {"icon": "lock-outline", "title": "Lock", "text": "Door opener, with an optional PIN as code."},
+      {"icon": "toggle-switch-outline", "title": "Switches", "text": "Ring-to-Open and Next ring opens (experimental, attribute until)."},
+      {"icon": "bell-outline", "title": "Binary sensors", "text": "Ding (20 s on after each ring) and Call active."},
+      {"icon": "timer-outline", "title": "Number", "text": "Unlock duration, 1 to 10 seconds, only on analog systems."},
+      {"icon": "restart", "title": "Button", "text": "Restart the intercom."},
+      {"icon": "stethoscope", "title": "Diagnostics", "text": "Hardware revision, intercom type and unlock mode."}
+    ],
+    "how": {
+      "cols": 3,
+      "items": [
+        {"icon": "home-assistant", "title": "Next to Ring", "text": "Borrows the logged-in client of the official Ring integration. No credentials in Ring Intercom Plus."},
+        {"icon": "cloud-outline", "title": "Ring cloud", "text": "Commands go through the Ring cloud, in the format the Ring app uses. Not a local connection."},
+        {"icon": "alert-outline", "title": "Unofficial API", "text": "Ring does not document this interface and can change it at any time."}
+      ]
+    }
+  }
+}

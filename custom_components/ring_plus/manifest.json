@@ -1,0 +1,18 @@
+{
+  "domain": "ring_plus",
+  "name": "Ring Intercom Plus",
+  "after_dependencies": [
+    "ring"
+  ],
+  "codeowners": [
+    "@SH1FT-W"
+  ],
+  "config_flow": true,
+  "documentation": "https://github.com/SH1FT-W/ring-intercom-plus",
+  "integration_type": "service",
+  "iot_class": "cloud_polling",
+  "issue_tracker": "https://github.com/SH1FT-W/ring-intercom-plus/issues",
+  "requirements": [],
+  "single_config_entry": true,
+  "version": "26.10.3"
+}

@@ -1,0 +1,94 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Ring Intercom Plus",
+        "description": "Ergänzt zusätzliche Funktionen der Ring Intercom. Nutzt die Anmeldung der Ring-Integration, keine Eingaben nötig."
+      }
+    },
+    "abort": {
+      "ring_missing": "Bitte zuerst die Ring-Integration einrichten.",
+      "single_instance_allowed": "Ring Intercom Plus ist bereits eingerichtet."
+    }
+  },
+  "entity": {
+    "binary_sensor": {
+      "active_call": {
+        "name": "Anruf aktiv"
+      },
+      "ding": {
+        "name": "Klingel"
+      }
+    },
+    "button": {
+      "reboot": {
+        "name": "Neustart"
+      }
+    },
+    "lock": {
+      "door": {
+        "name": "Türöffner"
+      }
+    },
+    "number": {
+      "unlock_duration": {
+        "name": "Öffnungsdauer"
+      }
+    },
+    "sensor": {
+      "hw_revision": {
+        "name": "Hardware-Revision"
+      },
+      "intercom_type": {
+        "name": "Anlagentyp"
+      },
+      "unlock_mode": {
+        "name": "Entsperr-Modus"
+      }
+    },
+    "switch": {
+      "auto_unlock": {
+        "name": "Nächstes Klingeln öffnet",
+        "state_attributes": {
+          "until": {
+            "name": "Bis"
+          }
+        }
+      },
+      "ring_to_open": {
+        "name": "Ring-to-Open"
+      }
+    }
+  },
+  "exceptions": {
+    "command_failed": {
+      "message": "Ring hat den Befehl nicht angenommen: {error}"
+    },
+    "wrong_code": {
+      "message": "Falsche PIN, die Tür bleibt zu."
+    },
+    "settings_unreadable": {
+      "message": "Einstellungen der Intercom nicht lesbar: {error}"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "PIN für den Türöffner",
+        "description": "Optionale PIN, die lock.unlock als Code mitgeben muss, bevor die Tür öffnet (4 bis 8 Ziffern). Leer lassen für keine PIN: dann öffnet jeder Aufruf die Tür, auch Sprachassistent, Dashboard und Automationen. Aktuell: {state}.",
+        "data": {
+          "unlock_code": "PIN"
+        }
+      }
+    },
+    "error": {
+      "invalid_code": "Bitte 4 bis 8 Ziffern."
+    }
+  },
+  "issues": {
+    "push_missing": {
+      "title": "Ring-Push für {name} kommt nicht an",
+      "description": "Home Assistant hat die letzten Klingeln von **{name}** nur über die regelmäßige Aktivitätsabfrage der Ring-Integration erfahren, nicht über deren sofortige Push-Meldung. Ring Intercom Plus erkennt sie trotzdem, etwa eine Minute später.\n\nFür sofortige Klingel-Meldungen die offizielle Ring-Integration neu laden oder neu konfigurieren (Einstellungen → Geräte & Dienste → Ring). Dieser Hinweis verschwindet mit dem nächsten Klingeln, das per Push ankommt."
+    }
+  }
+}

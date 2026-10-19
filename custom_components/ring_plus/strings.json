@@ -1,0 +1,94 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Ring Intercom Plus",
+        "description": "Adds extra Ring Intercom functions. Uses the login of the Ring integration, no input needed."
+      }
+    },
+    "abort": {
+      "ring_missing": "Set up the Ring integration first.",
+      "single_instance_allowed": "Ring Intercom Plus is already set up."
+    }
+  },
+  "entity": {
+    "binary_sensor": {
+      "active_call": {
+        "name": "Call active"
+      },
+      "ding": {
+        "name": "Ding"
+      }
+    },
+    "button": {
+      "reboot": {
+        "name": "Restart"
+      }
+    },
+    "lock": {
+      "door": {
+        "name": "Door opener"
+      }
+    },
+    "number": {
+      "unlock_duration": {
+        "name": "Unlock duration"
+      }
+    },
+    "sensor": {
+      "hw_revision": {
+        "name": "Hardware revision"
+      },
+      "intercom_type": {
+        "name": "Intercom type"
+      },
+      "unlock_mode": {
+        "name": "Unlock mode"
+      }
+    },
+    "switch": {
+      "auto_unlock": {
+        "name": "Next ring opens",
+        "state_attributes": {
+          "until": {
+            "name": "Until"
+          }
+        }
+      },
+      "ring_to_open": {
+        "name": "Ring-to-Open"
+      }
+    }
+  },
+  "exceptions": {
+    "command_failed": {
+      "message": "Ring did not accept the command: {error}"
+    },
+    "wrong_code": {
+      "message": "Wrong PIN, the door stays closed."
+    },
+    "settings_unreadable": {
+      "message": "Intercom settings not readable: {error}"
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Door opener PIN",
+        "description": "Optional PIN that lock.unlock has to pass as code before the door opens (4 to 8 digits). Leave empty for no PIN: then every unlock call opens the door, including voice assistants, dashboards and automations. Current setting: {state}.",
+        "data": {
+          "unlock_code": "PIN"
+        }
+      }
+    },
+    "error": {
+      "invalid_code": "4 to 8 digits, please."
+    }
+  },
+  "issues": {
+    "push_missing": {
+      "title": "Ring push messages for {name} are not arriving",
+      "description": "Home Assistant learned about the last rings of **{name}** only from the Ring integration's regular activity check, not from its instant push messages. Ring Intercom Plus still detects them, about a minute later.\n\nTo get instant rings back, reload or reconfigure the official Ring integration (Settings → Devices & services → Ring). This message disappears with the next ring that arrives by push."
+    }
+  }
+}

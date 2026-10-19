@@ -1,0 +1,82 @@
+name: Bug report
+description: Something in Ring Intercom Plus does not work as described, or an intercom behaves differently.
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Please do not post your Ring email address, tokens, device IDs, location IDs or serial numbers here. Log lines with those removed are enough.
+  - type: input
+    id: ha_version
+    attributes:
+      label: Home Assistant version
+      placeholder: "2026.10.1"
+    validations:
+      required: true
+  - type: input
+    id: ring_plus_version
+    attributes:
+      label: Ring Intercom Plus version
+      description: Settings > Devices & services > Ring Intercom Plus, or HACS.
+      placeholder: "26.10.2"
+    validations:
+      required: true
+  - type: dropdown
+    id: model
+    attributes:
+      label: Intercom model
+      options:
+        - Ring Intercom (Audio)
+        - Ring Intercom (Video)
+        - Other / not sure
+    validations:
+      required: true
+  - type: dropdown
+    id: intercom_type
+    attributes:
+      label: Intercom type
+      description: Sensor "Intercom type" of Ring Intercom Plus, or the Ring app.
+      options:
+        - analog
+        - digital
+        - not sure
+  - type: dropdown
+    id: account
+    attributes:
+      label: Ring account
+      description: The account the Ring integration is logged in with.
+      options:
+        - Owner of the device
+        - Shared user / guest
+    validations:
+      required: true
+  - type: input
+    id: firmware
+    attributes:
+      label: Firmware and hardware revision
+      description: From the device page of the Ring integration and the sensor "Hardware revision".
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: "1. ...\n2. ...\n3. ..."
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: What happens instead
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Log lines and anything else
+      description: Debug log lines (logger custom_components.ring_plus set to debug) with IDs removed, and whether the Ring integration itself works.
+      render: text

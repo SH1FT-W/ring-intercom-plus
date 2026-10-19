@@ -1,0 +1,38 @@
+Ring Intercom Plus for Home Assistant
+Copyright 2026 SH1FT-W
+
+This product is licensed under the Apache License, Version 2.0 (see LICENSE).
+
+How it works and what it relies on
+----------------------------------
+
+Ring Intercom Plus has no login of its own. It runs next to the official Home Assistant
+Ring integration (https://www.home-assistant.io/integrations/ring/) and sends its
+requests through that integration's authenticated client from the library
+python-ring-doorbell (https://github.com/python-ring-doorbell/python-ring-doorbell,
+GNU Lesser General Public License v3.0). Neither the library nor any of its source
+files is included in or copied into this repository; Home Assistant installs it
+for the Ring integration.
+
+The request format of the door unlock command (door_id 0, user_id -1) follows
+python-ring-doorbell. The other commands and settings (active call, hardware
+revision, auto unlock, Ring-to-Open, unlock duration, reboot) were observed in the
+official Ring app. The ding and unlock hold times (20 s and 5 s) follow the
+behaviour of ring-mqtt (https://github.com/tsightler/ring-mqtt, MIT License), so
+users switching over keep the same behaviour. No source files of ring-mqtt were
+copied.
+
+Unofficial API
+--------------
+
+Ring does not publish or support the interface used by this integration. Ring can
+change it at any time, and single functions may stop working until this
+integration is adapted.
+
+Trademarks
+----------
+
+Ring and the Ring logo are trademarks of Ring LLC or its affiliates (Amazon). The
+Ring logo in custom_components/ring_plus/brand/ and docs/ is used only to identify
+the supported devices. This project is independent and is not affiliated with,
+endorsed by or sponsored by Ring LLC, Amazon, Home Assistant or Nabu Casa.

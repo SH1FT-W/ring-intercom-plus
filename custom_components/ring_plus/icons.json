@@ -1,0 +1,53 @@
+{
+  "entity": {
+    "binary_sensor": {
+      "active_call": {
+        "default": "mdi:phone-off",
+        "state": {
+          "on": "mdi:phone-in-talk"
+        }
+      },
+      "ding": {
+        "default": "mdi:doorbell",
+        "state": {
+          "on": "mdi:bell-ring"
+        }
+      }
+    },
+    "lock": {
+      "door": {
+        "default": "mdi:door-closed-lock",
+        "state": {
+          "unlocked": "mdi:door-open"
+        }
+      }
+    },
+    "number": {
+      "unlock_duration": {
+        "default": "mdi:timer-lock-open-outline"
+      }
+    },
+    "sensor": {
+      "hw_revision": {
+        "default": "mdi:chip"
+      },
+      "intercom_type": {
+        "default": "mdi:deskphone"
+      },
+      "unlock_mode": {
+        "default": "mdi:lock-question"
+      }
+    },
+    "switch": {
+      "auto_unlock": {
+        "default": "mdi:door-closed-lock",
+        "state": {
+          "on": "mdi:door-open"
+        }
+      },
+      "ring_to_open": {
+        "default": "mdi:bell-ring-outline"
+      }
+    }
+  }
+}

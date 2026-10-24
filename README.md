@@ -1,6 +1,9 @@
 <div align="center">
 
-<img src="docs/images/readme-title.webp" alt="Ring Intercom Plus for Home Assistant: extra functions for the Ring Intercom." />
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/images/readme-title-dark.webp" />
+  <img src="docs/images/readme-title-light.webp" alt="Ring Intercom Plus: Your Ring Intercom, with the missing switches. The feature overview of the project page in a window." />
+</picture>
 
 <p>Door opener, ding, call active, Ring-to-Open, unlock duration and restart for the <b>Ring Intercom</b>.<br/>
 Runs next to the official Ring integration and uses its login.</p>
@@ -32,10 +35,13 @@ Ring Intercom Plus adds the intercom functions that the official [Ring integrati
 <a id="features"></a>
 ## Features
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="docs/images/readme-cards-features-dark.png" />
-  <img src="docs/images/readme-cards-features-light.png" alt="Door opener: a lock entity that buzzes the door open and shows unlocked for 5 seconds, also when the door is opened from the Ring app. Optional PIN: with a PIN of 4 to 8 digits the lock opens only with the right code. Ding and call active: a ding sensor that stays on for 20 seconds and a call sensor that follows the conversation for up to 3 minutes. Settings of the app: Ring-to-Open, unlock duration and a restart button. Uses the Ring integration: no second login and no second push connection. Next ring opens: experimental, the next ring within 60 seconds opens the door." />
-</picture>
+<!-- cards:features -->
+<table>
+<tr><td width="34" valign="top"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/icons/lock-open-variant-outline-dark.svg"><img src="docs/images/icons/lock-open-variant-outline-light.svg" width="26" height="26" alt=""></picture></td><td width="46%" valign="top"><b>Door opener</b><br>A lock entity that buzzes the door open and shows "unlocked" for 5 seconds, also when the door is opened from the Ring app.</td><td width="34" valign="top"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/icons/form-textbox-password-dark.svg"><img src="docs/images/icons/form-textbox-password-light.svg" width="26" height="26" alt=""></picture></td><td width="46%" valign="top"><b>Optional PIN</b><br>With a PIN of 4 to 8 digits the lock opens only with the right code, in dashboards, automations and voice assistants alike.</td></tr>
+<tr><td width="34" valign="top"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/icons/bell-ring-outline-dark.svg"><img src="docs/images/icons/bell-ring-outline-light.svg" width="26" height="26" alt=""></picture></td><td width="46%" valign="top"><b>Ding and call active</b><br>A ding sensor that stays on for 20 seconds and a call sensor that follows the conversation for up to 3 minutes.</td><td width="34" valign="top"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/icons/tune-variant-dark.svg"><img src="docs/images/icons/tune-variant-light.svg" width="26" height="26" alt=""></picture></td><td width="46%" valign="top"><b>Settings of the app</b><br>Ring-to-Open, unlock duration (1 to 10 s, analog systems) and a restart button, read every 5 minutes and after each change.</td></tr>
+<tr><td width="34" valign="top"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/icons/link-variant-dark.svg"><img src="docs/images/icons/link-variant-light.svg" width="26" height="26" alt=""></picture></td><td width="46%" valign="top"><b>Uses the Ring integration</b><br>No second login and no second push connection: rings and unlocks come from the event entities of the official integration.</td><td width="34" valign="top"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/icons/flask-outline-dark.svg"><img src="docs/images/icons/flask-outline-light.svg" width="26" height="26" alt=""></picture></td><td width="46%" valign="top"><b>Next ring opens</b><br>Experimental: the next ring within 60 seconds opens the door. Taken from the guest access of the Ring app.</td></tr>
+</table>
+<!-- /cards:features -->
 
 - **Door opener** as a lock: opens the door and shows "unlocked" for 5 seconds, also when the door is opened from the Ring app.
 - **Optional PIN** for the door opener (4 to 8 digits), checked for every `lock.unlock`.
@@ -50,10 +56,13 @@ Ring Intercom Plus adds the intercom functions that the official [Ring integrati
 <a id="entities"></a>
 ## Entities
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="docs/images/readme-cards-entities-dark.png" />
-  <img src="docs/images/readme-cards-entities-light.png" alt="Lock: door opener, with an optional PIN as code. Switches: Ring-to-Open and Next ring opens (experimental, attribute until). Binary sensors: Ding and Call active. Number: unlock duration, 1 to 10 seconds, analog systems only. Button: restart the intercom. Diagnostics: hardware revision, intercom type and unlock mode." />
-</picture>
+<!-- cards:entities -->
+<table>
+<tr><td width="34" valign="top"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/icons/lock-outline-dark.svg"><img src="docs/images/icons/lock-outline-light.svg" width="26" height="26" alt=""></picture></td><td width="46%" valign="top"><b>Lock</b><br>Door opener, with an optional PIN as code.</td><td width="34" valign="top"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/icons/toggle-switch-outline-dark.svg"><img src="docs/images/icons/toggle-switch-outline-light.svg" width="26" height="26" alt=""></picture></td><td width="46%" valign="top"><b>Switches</b><br>Ring-to-Open and Next ring opens (experimental, attribute until).</td></tr>
+<tr><td width="34" valign="top"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/icons/bell-outline-dark.svg"><img src="docs/images/icons/bell-outline-light.svg" width="26" height="26" alt=""></picture></td><td width="46%" valign="top"><b>Binary sensors</b><br>Ding (20 s on after each ring) and Call active.</td><td width="34" valign="top"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/icons/timer-outline-dark.svg"><img src="docs/images/icons/timer-outline-light.svg" width="26" height="26" alt=""></picture></td><td width="46%" valign="top"><b>Number</b><br>Unlock duration, 1 to 10 seconds, only on analog systems.</td></tr>
+<tr><td width="34" valign="top"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/icons/restart-dark.svg"><img src="docs/images/icons/restart-light.svg" width="26" height="26" alt=""></picture></td><td width="46%" valign="top"><b>Button</b><br>Restart the intercom.</td><td width="34" valign="top"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/icons/stethoscope-dark.svg"><img src="docs/images/icons/stethoscope-light.svg" width="26" height="26" alt=""></picture></td><td width="46%" valign="top"><b>Diagnostics</b><br>Hardware revision, intercom type and unlock mode.</td></tr>
+</table>
+<!-- /cards:entities -->
 
 | Entity | Type | What it does |
 |---|---|---|
@@ -141,10 +150,11 @@ The Ring integration and its device stay untouched.
 
 ## How it works
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="docs/images/readme-cards-how-dark.png" />
-  <img src="docs/images/readme-cards-how-light.png" alt="Next to Ring: borrows the logged-in client of the official Ring integration, no credentials in Ring Intercom Plus. Ring cloud: commands go through the Ring cloud in the format the Ring app uses, not a local connection. Unofficial API: Ring does not document this interface and can change it at any time." />
-</picture>
+<!-- cards:how -->
+<table>
+<tr><td width="34" valign="top"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/icons/home-assistant-dark.svg"><img src="docs/images/icons/home-assistant-light.svg" width="26" height="26" alt=""></picture></td><td width="29%" valign="top"><b>Next to Ring</b><br>Borrows the logged-in client of the official Ring integration. No credentials in Ring Intercom Plus.</td><td width="34" valign="top"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/icons/cloud-outline-dark.svg"><img src="docs/images/icons/cloud-outline-light.svg" width="26" height="26" alt=""></picture></td><td width="29%" valign="top"><b>Ring cloud</b><br>Commands go through the Ring cloud, in the format the Ring app uses. Not a local connection.</td><td width="34" valign="top"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/icons/alert-outline-dark.svg"><img src="docs/images/icons/alert-outline-light.svg" width="26" height="26" alt=""></picture></td><td width="29%" valign="top"><b>Unofficial API</b><br>Ring does not document this interface and can change it at any time.</td></tr>
+</table>
+<!-- /cards:how -->
 
 Ring Intercom Plus calls the authenticated client of the Ring integration (from [python-ring-doorbell](https://github.com/python-ring-doorbell/python-ring-doorbell)) for every request. The unlock command follows python-ring-doorbell; the other commands and settings follow the Ring app. Ring Intercom Plus never sends the intercom's calibration or setup commands. Details are in [`NOTICE`](NOTICE) and, in German, in [`CLAUDE.md`](CLAUDE.md).
 

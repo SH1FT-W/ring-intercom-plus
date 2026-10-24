@@ -64,7 +64,8 @@ Projektseite (`docs/index.html`) lesen die manifest.json selbst.
   neueste HA, plus hassfest; Abdeckungsgrenze 95 % (`--cov-fail-under`). `.github/workflows/hacs.yml`: HACS-Validierung.
 - `tools/next-version` und `tools/pruefe-uebersetzungen.py` sind byteidentische Kopien der gemeinsamen Vorlagen.
 - Testdaten sind fiktiv (Geräte-ID `123456`, Profil-ID `98765`, MAC `aa:bb:cc:dd:ee:ff`, Gerät „Front Door“).
-- README-Bilder: Karten aus `docs/readme-images.json`, gerendert mit `theme/v1/readme-images/render.mjs <repo> cards`
-  aus sh1ft-w.github.io. Titelbild: `docs/images/readme-title.webp` (fertiges Bild, unverändert für hell und dunkel;
-  derzeit Platzhalter); die Projektseite zeigt dasselbe Bild im Hero.
-  `docs/images/stage-photo.jpg` (Platzhalter) steht nur noch im ungenutzten title-Block der readme-images.json.
+- README-Bilder: Titelbild und Karten aus `docs/readme-images.json` mit `theme/v1/readme-images/render.mjs <repo>`
+  aus sh1ft-w.github.io: Titel als `docs/images/readme-title-{light,dark}.webp` (2560 × 1280, Fenster zeigt
+  `docs/images/title-shot-*.png`, den Funktionsblock der Projektseite mit 2× aufgenommen) plus `readme-title-social.png`
+  für die GitHub-Vorschau; die Karten stehen als Markdown-Tabellen zwischen `<!-- cards:… -->` im README, Icons in
+  `docs/images/icons/`. Die Projektseite zeigt das Titelbild im Hero.

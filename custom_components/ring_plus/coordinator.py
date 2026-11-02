@@ -1,4 +1,4 @@
-"""Zustand je Intercom: Einstellungen (Polling) plus Anruf/Auto-Öffnen (ereignisgesteuert)."""
+"""State per intercom: settings (polled) plus call/auto-unlock (event driven)."""
 
 from __future__ import annotations
 
@@ -33,7 +33,7 @@ _LOGGER = logging.getLogger(__name__)
 
 
 class IntercomCoordinator(DataUpdateCoordinator[dict[str, Any]]):
-    """Eine Ring Intercom. `data` = intercom_settings aus der Cloud."""
+    """One Ring Intercom. `data` = intercom_settings from the cloud."""
 
     config_entry: ConfigEntry
 
@@ -56,10 +56,10 @@ class IntercomCoordinator(DataUpdateCoordinator[dict[str, Any]]):
             update_interval=SETTINGS_INTERVAL,
         )
         self.api = api
-        self.ring_device_id = ring_device_id  # MAC, Gerätekennung der HA-Ring-Integration
+        self.ring_device_id = ring_device_id  # MAC, device identifier of the HA Ring integration
         self.device_name = name
         self.user_id = user_id
-        self.device_entry = device_entry  # Gerät der HA-Ring-Integration
+        self.device_entry = device_entry  # device of the HA Ring integration
         self.hw_revision: str | None = None
         self.active_call: bool | None = None
         self.auto_unlock_until: datetime | None = None
@@ -71,7 +71,7 @@ class IntercomCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         self.door_unlocked: bool = False
         self._ding_timer: CALLBACK_TYPE | None = None
         self._unlock_timer: CALLBACK_TYPE | None = None
-        # Ersatzweg ohne Push: zuletzt gesehenes Klingeln aus „Letzte Aktivität“ und Klingeln je Weg
+        # Fallback without push: last ding seen in "last activity", and the last ding per path
         self._activity_seen: datetime | None = None
         self._last_push_ding: datetime | None = None
         self._last_fallback_ding: datetime | None = None
@@ -88,13 +88,13 @@ class IntercomCoordinator(DataUpdateCoordinator[dict[str, Any]]):
             ) from err
 
     async def async_load_hw_revision(self) -> None:
-        """Einmalig beim Start; ein Fehler hier blockiert nichts."""
+        """Once at startup; an error here blocks nothing."""
         try:
             self.hw_revision = await self.api.async_hw_revision()
-        except Exception as err:  # noqa: BLE001 – Diagnose-Wert, darf fehlen
+        except Exception as err:  # noqa: BLE001 – diagnostic value, may be missing
             _LOGGER.debug("Hardware-Revision von %s nicht lesbar: %s", self.device_name, err)
 
-    # ---------- Nächstes Klingeln öffnet ----------
+    # ---------- Next ding unlocks ----------
 
     @property
     def auto_unlock_active(self) -> bool:
@@ -123,9 +123,7 @@ class IntercomCoordinator(DataUpdateCoordinator[dict[str, Any]]):
             self._auto_unlock_timer()
             self._auto_unlock_timer = None
 
-    # ---------- Anruf aktiv ----------
-
-    # ---------- Klingel / Türöffner (kurz „an“, wie ring-mqtt) ----------
+    # ---------- Ding / door opener (briefly "on", like ring-mqtt) ----------
 
     @callback
     def _ding_off(self, _now: datetime) -> None:
@@ -141,7 +139,7 @@ class IntercomCoordinator(DataUpdateCoordinator[dict[str, Any]]):
 
     @callback
     def async_handle_unlock(self) -> None:
-        """Tür wurde geöffnet (App, HA, Auto-Öffnen): Türöffner 5 s „aufgeschlossen“ zeigen."""
+        """Door was opened (app, HA, auto-unlock): show the door opener "unlocked" for 5 s."""
         if self._unlock_timer:
             self._unlock_timer()
         self.door_unlocked = True
@@ -154,7 +152,7 @@ class IntercomCoordinator(DataUpdateCoordinator[dict[str, Any]]):
 
     @callback
     def async_handle_push_ding(self) -> None:
-        """Klingeln per Push der Ring-Integration (sofort); kam es schon über den Ersatzweg, nur den Push merken."""
+        """Ding via push from the Ring integration (immediate); if the fallback already had it, only note the push."""
         now = dt_util.utcnow()
         self._last_push_ding = now
         self._push_recovered()
@@ -164,7 +162,7 @@ class IntercomCoordinator(DataUpdateCoordinator[dict[str, Any]]):
 
     @callback
     def async_handle_activity(self, category: str | None, created_at: datetime | None) -> None:
-        """„Letzte Aktivität“ der Ring-Integration geändert: Klingeln ohne Push nachholen (etwa 1 Minute später)."""
+        """Ring integration's "last activity" changed: catch up on a ding without push (about 1 minute later)."""
         if category != "ding" or created_at is None:
             return
         if self._activity_seen is not None and created_at <= self._activity_seen:
@@ -172,9 +170,9 @@ class IntercomCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         self._activity_seen = created_at
         now = dt_util.utcnow()
         if now - created_at > FALLBACK_MAX_AGE:
-            return  # alter Eintrag, z. B. direkt nach einem Neustart
+            return  # old entry, e.g. right after a restart
         if self._last_push_ding is not None and abs(self._last_push_ding - created_at) <= PUSH_MATCH_WINDOW:
-            return  # kam schon per Push
+            return  # already came via push
         _LOGGER.info("Klingeln von %s ohne Push erkannt (über Letzte Aktivität)", self.device_name)
         self._last_fallback_ding = now
         self.push_misses += 1
@@ -198,7 +196,7 @@ class IntercomCoordinator(DataUpdateCoordinator[dict[str, Any]]):
 
     @callback
     def async_handle_ding(self) -> None:
-        """Es hat geklingelt: Klingel-Sensor an, Auto-Öffnen verbraucht, Anrufstatus abfragen bis er endet."""
+        """It rang: ding sensor on, auto-unlock used up, poll the call state until the call ends."""
         if self._ding_timer:
             self._ding_timer()
         self.ding = True
@@ -207,10 +205,12 @@ class IntercomCoordinator(DataUpdateCoordinator[dict[str, Any]]):
             self._cancel_auto_unlock_timer()
             self.auto_unlock_until = None
         self.async_update_listeners()
-        # Neue Abfragekette; eine noch laufende Abfrage wird abgebrochen, sonst liefen zwei Ketten parallel
+        # New polling chain; a request still running is cancelled, otherwise two chains would run in parallel
         self._call_polls = 0
         self._cancel_call_timer()
         self._start_call_poll()
+
+    # ---------- Call active ----------
 
     @callback
     def _start_call_poll(self) -> None:
@@ -221,16 +221,17 @@ class IntercomCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         )
 
     async def _async_poll_active_call(self) -> None:
+        active: bool | None
         try:
             active = await self.api.async_active_call()
-        except Exception as err:  # noqa: BLE001 – Cloud-Hänger dürfen den Ablauf nicht stoppen
+        except Exception as err:  # noqa: BLE001 – a cloud hiccup must not stop the polling
             _LOGGER.debug("active_call von %s fehlgeschlagen: %s", self.device_name, err)
-            active = False
+            active = None  # unknown, not "no call": keep the last known state and ask again
         self._call_polls += 1
-        if active != self.active_call:
+        if active is not None and active != self.active_call:
             self.active_call = active
             self.async_update_listeners()
-        if active and self._call_polls < ACTIVE_CALL_MAX_POLLS:
+        if active is not False and self._call_polls < ACTIVE_CALL_MAX_POLLS:
             self._call_timer = async_call_later(self.hass, ACTIVE_CALL_POLL, self._call_timer_fired)
 
     @callback

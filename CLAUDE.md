@@ -58,6 +58,9 @@ Projektseite (`docs/index.html`) lesen die manifest.json selbst.
 
 - `.venv/bin/python -m pytest -q -p no:logging --cov=custom_components/ring_plus` (≥ 95 %), auch mit
   `LC_ALL=en_US.UTF-8 TZ=UTC`. Fake-Ring in `tests/common.py`, keine echte Ring-Cloud.
+  `tests/test_ha_ring.py` richtet die echte HA-Ring-Integration der installierten HA-Version ein (nur Netz/Push
+  von ring_doorbell gefälscht) und prüft die Annahmen aus `docs/ha-annahmen.md`; ihre Pakete stehen in
+  `requirements_test.txt` und müssen bei einem HA-Update zu den Manifesten von `ring`/`ffmpeg`/`camera` passen.
 - `uvx ruff check . && uvx ruff format --check .`, `uvx mypy@2.3.1 --python-executable .venv/bin/python` (strict)
 - `.venv/bin/python tools/pruefe-uebersetzungen.py` (strings.json gegen translations/*.json)
 - GitHub Actions `.github/workflows/pruefung.yml`: dasselbe bei Push/PR auf main, montags zusätzlich gegen die

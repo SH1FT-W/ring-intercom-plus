@@ -1,2 +1,7 @@
 homeassistant==2026.9.3
 pytest-homeassistant-custom-component==0.13.366
+# For tests/test_ha_ring.py (real HA Ring integration): its requirements and those of its dependencies
+# (ring, ffmpeg, camera), pinned as in the manifests of the HA version above.
+ring-doorbell==0.9.14
+ha-ffmpeg==3.2.2
+PyTurboJPEG==1.8.3

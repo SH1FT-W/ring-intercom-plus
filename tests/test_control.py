@@ -1,4 +1,4 @@
-"""Befehle: Formate wie in der Ring-App."""
+"""Commands: formats as in the Ring app."""
 
 from __future__ import annotations
 
@@ -17,7 +17,7 @@ from pytest_homeassistant_custom_component.common import MockConfigEntry, async_
 
 from common import DEVICE_API_ID, USER_ID, FakeRing
 from custom_components.ring_plus.api import unlock_duration
-from custom_components.ring_plus.const import DOMAIN
+from custom_components.ring_plus.const import ACTIVE_CALL_MAX_POLLS, DOMAIN
 
 AUTO = "switch.front_door_nachstes_klingeln_offnet"
 
@@ -35,9 +35,9 @@ async def test_auto_unlock_on_and_expires(hass: HomeAssistant, ring: FakeRing, s
     assert params["waiting_interval"] == 60
     assert params["anyring"] == 0
     assert params["origin"] == "user"
-    assert params["issue_time"] > 1_700_000_000_000  # Millisekunden wie die App
+    assert params["issue_time"] > 1_700_000_000_000  # milliseconds like the app
     assert hass.states.get(AUTO).state == "on"
-    assert hass.states.get(AUTO).attributes["until"] is not None  # englischer Schlüssel, übersetzt als „Bis“
+    assert hass.states.get(AUTO).attributes["until"] is not None  # English key, translated as "Bis"
 
     async_fire_time_changed(hass, dt_util.utcnow() + timedelta(seconds=61))
     await hass.async_block_till_done()
@@ -75,10 +75,10 @@ async def test_unlock_duration(hass: HomeAssistant, ring: FakeRing, setup: MockC
     assert (method, url) == ("PATCH", f"/devices/v1/devices/{DEVICE_API_ID}/settings")
     sent = body["intercom_settings"]
     config = json.loads(sent["config"])
-    assert config["analog"] == {"unlock_duration": 5000, "audio_amp": 2}  # Rest bleibt erhalten
+    assert config["analog"] == {"unlock_duration": 5000, "audio_amp": 2}  # the rest is kept
     assert sent["ring_to_open"] is False
     assert sent["unlock_mode"] == 0
-    assert "mic_index" not in sent  # null weglassen wie Gson
+    assert "mic_index" not in sent  # drop null like Gson
     assert hass.states.get("number.front_door_offnungsdauer").state == "5"
 
 
@@ -124,7 +124,7 @@ async def test_lock_shows_app_unlock(hass: HomeAssistant, ring: FakeRing, setup:
     hass.states.async_set(UNLOCK_ENTITY, "2026-10-12T10:07:00.000+00:00", {"event_type": "intercom_unlock"})
     await hass.async_block_till_done()
     assert hass.states.get("lock.front_door_turoffner").state == "unlocked"
-    assert ring.rpcs("unlock_door") == []  # nur angezeigt, nichts gesendet
+    assert ring.rpcs("unlock_door") == []  # only shown, nothing sent
 
 
 async def test_lock_does_nothing(hass: HomeAssistant, ring: FakeRing, setup: MockConfigEntry) -> None:
@@ -134,7 +134,7 @@ async def test_lock_does_nothing(hass: HomeAssistant, ring: FakeRing, setup: Moc
 
 
 async def test_lock_with_pin(hass: HomeAssistant, ring: FakeRing, ring_entry: MockConfigEntry) -> None:
-    """Mit PIN in den Optionen öffnet lock.unlock nur noch mit dem richtigen Code."""
+    """With a PIN in the options, lock.unlock only opens with the right code."""
     hass.config.language = "de"
     entry = MockConfigEntry(domain=DOMAIN, title="Ring Intercom Plus", data={}, options={"unlock_code": "1234"})
     entry.add_to_hass(hass)
@@ -142,7 +142,7 @@ async def test_lock_with_pin(hass: HomeAssistant, ring: FakeRing, ring_entry: Mo
     await hass.async_block_till_done()
     lock = "lock.front_door_turoffner"
     assert hass.states.get(lock).attributes["code_format"] == r"^\d{4,8}$"
-    with pytest.raises(ServiceValidationError):  # HA prüft das Format: kein Code
+    with pytest.raises(ServiceValidationError):  # HA checks the format: no code
         await _call(hass, "lock", "unlock", lock)
     with pytest.raises(ServiceValidationError, match="Wrong PIN"):
         await _call(hass, "lock", "unlock", lock, code="9999")
@@ -163,7 +163,14 @@ async def test_active_call_error_is_harmless(hass: HomeAssistant, ring: FakeRing
     await hass.async_block_till_done()
     assert hass.states.get("binary_sensor.front_door_klingel").state == "on"
     assert hass.states.get("binary_sensor.front_door_anruf_aktiv").state == "off"
-    assert setup.runtime_data.intercoms[0]._call_timer is None  # kein weiteres Nachfragen
+    coordinator = setup.runtime_data.intercoms[0]
+    assert coordinator._call_timer is not None  # an error is "unknown", so it asks again
+    for _ in range(ACTIVE_CALL_MAX_POLLS):
+        async_fire_time_changed(hass, dt_util.utcnow() + timedelta(seconds=11))
+        await hass.async_block_till_done()
+    assert len(ring.rpcs("active_call")) == ACTIVE_CALL_MAX_POLLS  # gives up after the usual limit
+    assert coordinator._call_timer is None
+    assert hass.states.get("binary_sensor.front_door_anruf_aktiv").state == "off"
 
 
 async def test_unload_cancels_timers(hass: HomeAssistant, ring: FakeRing, setup: MockConfigEntry) -> None:
@@ -179,13 +186,13 @@ async def test_unload_cancels_timers(hass: HomeAssistant, ring: FakeRing, setup:
     assert coordinator._ding_timer is None and coordinator._unlock_timer is None
     assert coordinator._call_timer is None and coordinator._auto_unlock_timer is None
     async_fire_time_changed(hass, dt_util.utcnow() + timedelta(seconds=120))
-    await hass.async_block_till_done()  # kein Termin schreibt mehr in entladene Entitäten
+    await hass.async_block_till_done()  # no timer writes to unloaded entities any more
 
 
 async def test_second_ding_replaces_running_call_poll(
     hass: HomeAssistant, ring: FakeRing, setup: MockConfigEntry
 ) -> None:
-    """Klingelt es, während noch eine active_call-Abfrage läuft, läuft danach nur eine Kette weiter."""
+    """A ding while an active_call request is still running leaves only one polling chain."""
     coordinator = setup.runtime_data.intercoms[0]
     gate = asyncio.Event()
     original = coordinator.api.async_active_call
@@ -230,7 +237,7 @@ def _activity(hass: HomeAssistant, when: datetime) -> None:
 
 
 async def test_ding_without_push_comes_from_last_activity(hass: HomeAssistant, setup: MockConfigEntry) -> None:
-    """Fällt der Push aus, erkennt Ring Intercom Plus das Klingeln über „Letzte Aktivität“ (etwas später)."""
+    """Without push, Ring Intercom Plus detects the ding via "last activity" (a bit later)."""
     _activity(hass, dt_util.utcnow() - timedelta(seconds=40))
     await hass.async_block_till_done()
     assert hass.states.get("binary_sensor.front_door_klingel").state == "on"
@@ -251,7 +258,7 @@ async def test_ding_by_push_is_not_counted_twice(hass: HomeAssistant, setup: Moc
 
 
 async def test_old_or_other_activity_is_ignored(hass: HomeAssistant, setup: MockConfigEntry) -> None:
-    _activity(hass, dt_util.utcnow() - timedelta(minutes=10))  # z. B. alter Stand nach einem Neustart
+    _activity(hass, dt_util.utcnow() - timedelta(minutes=10))  # e.g. old value after a restart
     await hass.async_block_till_done()
     stamp = dt_util.utcnow().isoformat()
     hass.states.async_set(ACTIVITY_ENTITY, stamp, {"category": "motion", "created_at": stamp})
@@ -272,3 +279,26 @@ async def test_repair_issue_while_push_is_missing(hass: HomeAssistant, setup: Mo
     await hass.async_block_till_done()
     assert ir.async_get(hass).async_get_issue(DOMAIN, issue_id) is None
     assert coordinator.push_misses == 0
+
+
+async def test_active_call_error_keeps_state_and_retries(
+    hass: HomeAssistant, ring: FakeRing, setup: MockConfigEntry
+) -> None:
+    """A cloud error while a call is active must not switch "call active" off or end the polling."""
+    ring.active_call = [True]
+    hass.states.async_set(DING_ENTITY, "2026-10-12T10:05:00.000+00:00", {"event_type": "ding"})
+    await hass.async_block_till_done()
+    assert hass.states.get("binary_sensor.front_door_anruf_aktiv").state == "on"
+
+    ring.active_call_error = True
+    async_fire_time_changed(hass, dt_util.utcnow() + timedelta(seconds=11))
+    await hass.async_block_till_done()
+    assert hass.states.get("binary_sensor.front_door_anruf_aktiv").state == "on"  # last known state kept
+    assert setup.runtime_data.intercoms[0]._call_timer is not None  # asks again
+
+    ring.active_call_error = False
+    ring.active_call = [False]
+    async_fire_time_changed(hass, dt_util.utcnow() + timedelta(seconds=22))
+    await hass.async_block_till_done()
+    assert hass.states.get("binary_sensor.front_door_anruf_aktiv").state == "off"
+    assert setup.runtime_data.intercoms[0]._call_timer is None

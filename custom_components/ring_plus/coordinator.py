@@ -48,6 +48,9 @@ from .storage import PersistentState
 
 _LOGGER = logging.getLogger(__name__)
 
+# Before unloading, wait at most this long (seconds) for an opening that may already have reached Ring
+OPEN_WAIT_ON_UNLOAD = 15
+
 
 class RingAlert(NamedTuple):
     """An active alert of the Ring integration's push listener: Ring's own id and time of the event."""
@@ -298,6 +301,8 @@ class IntercomCoordinator(DataUpdateCoordinator[dict[str, Any]]):
             # Armed before a restart in which Ring did not return the user ID: cannot be disarmed, ends by itself
             raise ServiceValidationError(translation_domain=DOMAIN, translation_key="no_user_id")
         if disarm_intercom and self.user_id is not None:
+            # Save Home Assistant's part before waiting for Ring: a reload or crash meanwhile must not lose a pause
+            self._save()
             # The intercom's own mode: shown as armed until Ring confirms; an error is shown to the user
             await self.api.async_set_auto_unlock(self.user_id, False, AUTO_UNLOCK_WINDOW)
         self._clear_window()
@@ -556,7 +561,12 @@ class IntercomCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         """Before unloading: let an opening that may already have reached Ring finish (bounded)."""
         task = self._open_task
         if task is not None and not task.done() and self._open_sent:
-            await asyncio.wait({task}, timeout=15)
+            await asyncio.wait({task}, timeout=OPEN_WAIT_ON_UNLOAD)
+            if not task.done() and self.auto_unlock_mode == MODE_WINDOW:
+                # Still pending: the door may open, so the window counts as used. The reloaded entry restores
+                # from the saved state and must not open again on the next ring.
+                self._clear_window()
+                self._save()
 
     @callback
     def async_shutdown_timers(self) -> None:

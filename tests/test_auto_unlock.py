@@ -647,3 +647,68 @@ async def test_unload_waits_for_sent_opening(hass: HomeAssistant, ring: FakeRing
     assert hass.states.get(AUTO).state == "off"
     await _ding(hass)
     assert len(ring.rpcs("unlock_door")) == 1
+
+
+async def test_off_in_schedule_pause_saved_before_slow_disarm(
+    hass: HomeAssistant, ring: FakeRing, ring_entry, hass_storage
+) -> None:
+    """Off during a schedule while the intercom's minute is armed: the pause is saved before Ring answers, so a
+    reload (or a crash) while the disarm command is pending does not lose it."""
+    _schedule(hass, "on")
+    entry = await _setup(hass, {"auto_unlock_schedule": SCHEDULE})
+    await _call(hass, "switch", "turn_on", AUTO)  # 1 minute at the intercom
+    coordinator = entry.runtime_data.intercoms[0]
+    gate = asyncio.Event()
+    original = coordinator.api.async_set_auto_unlock
+
+    async def slow(*args: Any, **kwargs: Any) -> None:
+        await gate.wait()
+        await original(*args, **kwargs)
+
+    coordinator.api.async_set_auto_unlock = slow  # type: ignore[method-assign]
+    turn_off = hass.async_create_task(
+        hass.services.async_call("switch", "turn_off", {"entity_id": AUTO}, blocking=True)
+    )
+    for _ in range(5):
+        await asyncio.sleep(0)  # the switch is off on the Home Assistant side, the disarm command waits at the gate
+    assert await hass.config_entries.async_reload(entry.entry_id)  # while the command is pending
+    gate.set()
+    await turn_off
+    await hass.async_block_till_done()
+    assert _paused(hass)
+    async_fire_time_changed(hass, dt_util.utcnow() + timedelta(seconds=61))
+    await hass.async_block_till_done()
+    await _ding(hass)
+    assert ring.rpcs("unlock_door") == []
+
+
+async def test_unload_after_slow_opening_uses_up_window(
+    hass: HomeAssistant, ring: FakeRing, setup: MockConfigEntry, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """A reload while an opening is still pending after the bounded wait: the window counts as used, so the
+    reloaded entry does not open the door a second time on the next ring."""
+    from custom_components.ring_plus import coordinator as coordinator_module
+
+    monkeypatch.setattr(coordinator_module, "OPEN_WAIT_ON_UNLOAD", 0.01)
+    await _window(hass, 30)
+    await _call(hass, "switch", "turn_on", AUTO)
+    coordinator = setup.runtime_data.intercoms[0]
+    gate = asyncio.Event()
+    original = coordinator.api.async_unlock_door
+
+    async def slow() -> None:
+        await gate.wait()
+        await original()
+
+    coordinator.api.async_unlock_door = slow  # type: ignore[method-assign]
+    push_alert(hass, "ding")
+    coordinator.async_handle_push_ding()
+    await asyncio.sleep(0)  # the opening task starts and waits at the gate (command "sent")
+    assert await hass.config_entries.async_reload(setup.entry_id)  # the wait ends before the opening does
+    assert hass.states.get(AUTO).state == "off"
+    gate.set()
+    await hass.async_block_till_done()
+    await _ding(hass, dt_util.utcnow() + timedelta(seconds=1))
+    assert len(ring.rpcs("unlock_door")) == 1
+    async_fire_time_changed(hass, dt_util.utcnow() + timedelta(seconds=6))  # "unlocked" display of the late opening
+    await hass.async_block_till_done()

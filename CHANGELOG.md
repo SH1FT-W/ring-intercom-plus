@@ -1,5 +1,10 @@
 # Changelog
 
+## 26.11.1 – 02.11.2026
+
+- **Fix:** a cloud error while checking "Call active" no longer switches the sensor off during a call. The last known state is kept and checking continues until the usual limit.
+- Tests: Ring Intercom Plus now also runs against the real Ring integration of Home Assistant, so a change there that breaks it shows up in the tests.
+
 ## 26.10.3 – 19.10.2026
 
 - **Rings without push:** if the official Ring integration stops receiving its instant push messages (a known problem), Ring Intercom Plus now still detects a ring from the integration's regular "Last activity" check, about a minute later. A ring that arrives by push is never counted twice.

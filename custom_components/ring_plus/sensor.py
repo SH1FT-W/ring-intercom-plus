@@ -1,4 +1,4 @@
-"""Diagnose-Sensoren: Hardware-Revision, Anlagentyp, Entsperr-Modus."""
+"""Sensors: last opened, plus diagnostics (hardware revision, intercom type, unlock mode)."""
 
 from __future__ import annotations
 
@@ -6,7 +6,7 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from typing import Any
 
-from homeassistant.components.sensor import SensorEntity, SensorEntityDescription
+from homeassistant.components.sensor import SensorDeviceClass, SensorEntity, SensorEntityDescription
 from homeassistant.const import EntityCategory
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
@@ -33,11 +33,11 @@ SENSORS: tuple[RingPlusSensorDescription, ...] = (
 async def async_setup_entry(
     hass: HomeAssistant, entry: RingPlusConfigEntry, async_add_entities: AddConfigEntryEntitiesCallback
 ) -> None:
-    async_add_entities(
-        RingPlusSensor(coordinator, description)
-        for coordinator in entry.runtime_data.intercoms
-        for description in SENSORS
-    )
+    entities: list[SensorEntity] = []
+    for coordinator in entry.runtime_data.intercoms:
+        entities.append(LastOpenedSensor(coordinator))
+        entities.extend(RingPlusSensor(coordinator, description) for description in SENSORS)
+    async_add_entities(entities)
 
 
 class RingPlusSensor(RingPlusEntity, SensorEntity):
@@ -51,3 +51,20 @@ class RingPlusSensor(RingPlusEntity, SensorEntity):
     @property
     def native_value(self) -> Any:
         return self.entity_description.value(self.coordinator)
+
+
+class LastOpenedSensor(RingPlusEntity, SensorEntity):
+    """When the door was last opened, and how (attribute `source`, HA user in `user`). Survives restarts."""
+
+    _attr_device_class = SensorDeviceClass.TIMESTAMP
+
+    def __init__(self, coordinator: IntercomCoordinator) -> None:
+        super().__init__(coordinator, "last_opened")
+
+    @property
+    def native_value(self) -> Any:
+        return self.coordinator.last_opened
+
+    @property
+    def extra_state_attributes(self) -> dict[str, Any]:
+        return {"source": self.coordinator.last_opened_source, "user": self.coordinator.last_opened_user}

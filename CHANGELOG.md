@@ -1,5 +1,17 @@
 # Changelog
 
+## 26.11.2 – 02.11.2026
+
+- **Next ring opens with a time window:** new number "Next ring opens: time window" (1 to 480 minutes) and action `ring_plus.next_ring_opens` with an optional `duration`. 1 minute stays the default and works as before (the intercom's own 60 seconds). Longer windows are handled by Home Assistant: it opens the door when the next ring arrives by push, then the switch turns off. A ring seen only later through "Last activity" never opens the door. The window survives restarts and is never longer than 8 hours.
+- **Schedule for Next ring opens (optional):** pick a schedule helper in the options. While it is on, every ring that arrives by push opens the door. Switching "Next ring opens" off pauses the schedule until it turns off, also across restarts.
+- **Last opened:** new sensor with the time of the last opening and its source (`home_assistant` with the user, `auto_unlock`, `ring_app`, `ring_history`, `unknown`). It survives restarts.
+- The options now start with a menu (PIN, schedule); changing one keeps the other.
+- The switch "Next ring opens" stays available while the intercom settings cannot be read, and it now exists even if Ring does not return the user ID of the account (then only the 1 minute mode is missing), so it can always be switched off.
+- The intercom's own 60 seconds survive a reload of Ring Intercom Plus: the switch keeps showing them and switching off still disarms the intercom.
+- Home Assistant opens only for a new ring as Ring identifies it (its own id and time), not when the Ring integration repeats an earlier ring event, for example after an unlock or a restart.
+- **Fix:** a reload of the Ring integration no longer counts as a ring or an unlock (its event entities come back with their old state); before, the ding sensor and the door opener briefly switched on. A ring event that the Ring integration repeats while the ring is still active (for example on the next unlock) no longer counts as a second ring.
+- Tests: time window, schedule, restarts, repeated and old ring events (also against the real Ring integration of Home Assistant).
+
 ## 26.11.1 – 02.11.2026
 
 - **Fix:** a cloud error while checking "Call active" no longer switches the sensor off during a call. The last known state is kept and checking continues until the usual limit.

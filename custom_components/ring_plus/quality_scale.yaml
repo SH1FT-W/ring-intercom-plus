@@ -4,8 +4,8 @@
 rules:
   # Bronze
   action-setup:
-    status: exempt
-    comment: Keine eigenen Aktionen; alles läuft über Schloss, Schalter, Zahl und Knopf.
+    status: done
+    comment: Aktion ring_plus.next_ring_opens wird in async_setup registriert (Plattform-Entitätsdienst am Schalter).
   appropriate-polling:
     status: done
     comment: Einstellungen alle 5 Minuten und nach jeder Änderung; Klingeln/Entsperren kommen als Ereignisse der Ring-Integration, „Anruf aktiv“ nur nach einem Klingeln (alle 10 s, höchstens 3 Minuten).
@@ -21,8 +21,8 @@ rules:
     status: exempt
     comment: Keine eigenen Abhängigkeiten; nutzt das Ring-Objekt (ring_doorbell) der HA-Ring-Integration.
   docs-actions:
-    status: exempt
-    comment: Keine eigenen Aktionen.
+    status: done
+    comment: Aktion ring_plus.next_ring_opens im README.
   docs-triggers:
     status: exempt
     comment: Keine eigenen Auslöser.
@@ -55,7 +55,7 @@ rules:
   config-entry-unloading: done
   docs-configuration-parameters:
     status: done
-    comment: Option PIN im README.
+    comment: Optionen PIN und Zeitplan im README.
   docs-installation-parameters:
     status: exempt
     comment: Keine Parameter bei der Einrichtung.

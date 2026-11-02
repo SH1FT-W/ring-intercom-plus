@@ -5,21 +5,41 @@ from __future__ import annotations
 import asyncio
 from collections.abc import Callable
 from dataclasses import dataclass, field
+from datetime import timedelta
 import logging
 from typing import Any
 
+from homeassistant.components.switch import DOMAIN as SWITCH_DOMAIN
 from homeassistant.config_entries import SIGNAL_CONFIG_ENTRY_CHANGED, ConfigEntry, ConfigEntryChange, ConfigEntryState
 from homeassistant.const import STATE_UNAVAILABLE, STATE_UNKNOWN, Platform
-from homeassistant.core import CALLBACK_TYPE, Event, EventStateChangedData, HomeAssistant, State, callback
-from homeassistant.exceptions import ConfigEntryNotReady
-from homeassistant.helpers import device_registry as dr, entity_registry as er
+from homeassistant.core import CALLBACK_TYPE, Event, EventStateChangedData, HomeAssistant, ServiceCall, State, callback
+from homeassistant.exceptions import ConfigEntryNotReady, ServiceValidationError
+from homeassistant.helpers import (
+    config_validation as cv,
+    device_registry as dr,
+    entity_registry as er,
+    service,
+)
 from homeassistant.helpers.dispatcher import async_dispatcher_connect
+from homeassistant.helpers.entity import Entity
 from homeassistant.helpers.event import async_track_state_change_event
+from homeassistant.helpers.typing import ConfigType
 from homeassistant.util import dt as dt_util
+import voluptuous as vol
 
 from .api import IntercomApi, RingResponse, async_get_user_id
-from .const import INTERCOM_KINDS, RING_DOMAIN
-from .coordinator import IntercomCoordinator
+from .const import (
+    ATTR_DURATION,
+    AUTO_UNLOCK_WINDOW_MAX,
+    AUTO_UNLOCK_WINDOW_MIN,
+    CONF_AUTO_UNLOCK_SCHEDULE,
+    DOMAIN,
+    INTERCOM_KINDS,
+    RING_DOMAIN,
+    SERVICE_NEXT_RING_OPENS,
+)
+from .coordinator import AlertLookup, IntercomCoordinator, RingAlert
+from .storage import DATA_STATE, EVENT_STATES_KEY, PersistentState, async_get_state
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -41,6 +61,32 @@ class RingPlusData:
 
 
 type RingPlusConfigEntry = ConfigEntry[RingPlusData]
+
+CONFIG_SCHEMA = cv.config_entry_only_config_schema(DOMAIN)
+
+
+async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
+    """Action "Next ring opens" with a time window (on the switch of each intercom)."""
+    service.async_register_platform_entity_service(
+        hass,
+        DOMAIN,
+        SERVICE_NEXT_RING_OPENS,
+        entity_domain=SWITCH_DOMAIN,
+        schema={
+            vol.Optional(ATTR_DURATION): vol.All(
+                cv.time_period,
+                vol.Range(min=timedelta(minutes=AUTO_UNLOCK_WINDOW_MIN), max=timedelta(minutes=AUTO_UNLOCK_WINDOW_MAX)),
+            )
+        },
+        func=_async_next_ring_opens,
+    )
+    return True
+
+
+async def _async_next_ring_opens(entity: Entity, call: ServiceCall) -> None:
+    if not hasattr(entity, "async_next_ring_opens"):  # e.g. the Ring-to-Open switch
+        raise ServiceValidationError(translation_domain=DOMAIN, translation_key="not_auto_unlock")
+    await entity.async_next_ring_opens(call.data.get(ATTR_DURATION))
 
 
 def _ring_entry(hass: HomeAssistant) -> ConfigEntry | None:
@@ -77,6 +123,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: RingPlusConfigEntry) -> 
         _LOGGER.warning("Ring-Benutzer-ID nicht lesbar, Auto-Öffnen nicht verfügbar: %s", err)
         user_id = None
 
+    state = await async_get_state(hass)
+    schedule = entry.options.get(CONF_AUTO_UNLOCK_SCHEDULE) or None
     device_registry = dr.async_get(hass)
     data = RingPlusData()
     for device in intercoms:
@@ -93,13 +141,18 @@ async def async_setup_entry(hass: HomeAssistant, entry: RingPlusConfigEntry) -> 
             name=str(device.name),
             user_id=user_id,
             device_entry=device_entry,
+            state=state,
+            schedule_entity_id=schedule,
+            alert_lookup=_alert_lookup(hass, int(device.id)),
         )
         await coordinator.async_config_entry_first_refresh()
         data.intercoms.append(coordinator)
     await asyncio.gather(*(coordinator.async_load_hw_revision() for coordinator in data.intercoms))
 
     entry.runtime_data = data
-    _listen_for_dings(hass, entry)
+    for coordinator in data.intercoms:
+        coordinator.async_start()
+    _listen_for_dings(hass, entry, state)
     _watch_ring_entry(hass, entry, ring_entry)
     entry.async_on_unload(entry.add_update_listener(_async_options_updated))
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
@@ -111,7 +164,7 @@ async def _async_options_updated(hass: HomeAssistant, entry: RingPlusConfigEntry
     hass.config_entries.async_schedule_reload(entry.entry_id)
 
 
-def _listen_for_dings(hass: HomeAssistant, entry: RingPlusConfigEntry) -> None:
+def _listen_for_dings(hass: HomeAssistant, entry: RingPlusConfigEntry, state: PersistentState) -> None:
     """Klingeln/Entsperren der HA-Ring-Integration (event.*) mitlesen, keine zweite Push-Verbindung.
 
     Die Handler hängen an Entity-IDs; wird ein Ring-Ereignis umbenannt, neu angelegt oder gelöscht,
@@ -133,14 +186,24 @@ def _listen_for_dings(hass: HomeAssistant, entry: RingPlusConfigEntry) -> None:
         # Ersatzweg, wenn der Push ausfällt: die Ring-Integration fragt „Letzte Aktivität“ regelmäßig ab
         by_unique_id[("sensor", f"{api_id}-last_activity")] = (coordinator.device_name, _activity_handler(coordinator))
     handlers: dict[str, Callable[[State], None]] = {}
+    unique_ids: dict[str, str] = {}
     unsubscribe: list[CALLBACK_TYPE] = []
+    # Last real state per Ring entity (by unique_id), kept across reloads and restarts: after a reload of Ring
+    # its entities go unavailable and come back with the same (restored) state, which is no new ring or unlock
+    last_value = state.data.setdefault(EVENT_STATES_KEY, {})
 
     @callback
     def _changed(event: Event[EventStateChangedData]) -> None:
+        entity_id = event.data["entity_id"]
         old, new = event.data["old_state"], event.data["new_state"]
         if old is None or new is None or new.state in (STATE_UNAVAILABLE, STATE_UNKNOWN) or new.state == old.state:
             return
-        if handler := handlers.get(event.data["entity_id"]):
+        unique_id = unique_ids.get(entity_id, entity_id)
+        if last_value.get(unique_id) == new.state:
+            return
+        last_value[unique_id] = new.state
+        state.async_save()
+        if handler := handlers.get(entity_id):
             handler(new)
 
     @callback
@@ -152,6 +215,12 @@ def _listen_for_dings(hass: HomeAssistant, entry: RingPlusConfigEntry) -> None:
         for (platform, unique_id), (device_name, handler) in by_unique_id.items():
             if entity_id := registry.async_get_entity_id(platform, RING_DOMAIN, unique_id):
                 handlers[entity_id] = handler
+                unique_ids[entity_id] = unique_id
+                if (current := hass.states.get(entity_id)) is not None and current.state not in (
+                    STATE_UNAVAILABLE,
+                    STATE_UNKNOWN,
+                ):
+                    last_value.setdefault(unique_id, current.state)
             else:
                 _LOGGER.info("Ring-Entität %s für %s nicht gefunden", unique_id.rsplit("-", 1)[-1], device_name)
         if handlers:
@@ -194,6 +263,29 @@ def _ignore_state(handler: Callable[[], None]) -> Callable[[State], None]:
     return _call
 
 
+def _alert_lookup(hass: HomeAssistant, device_api_id: int) -> AlertLookup:
+    """Active alert of the Ring integration's push listener (`listen_coordinator.alerts`, ring_doorbell RingEvent).
+
+    Missing or changed structure → None: then Home Assistant does not open the door by itself (fails closed).
+    """
+
+    def _lookup(kind: str) -> RingAlert | None:
+        ring_entry = _ring_entry(hass)
+        try:
+            alert = ring_entry.runtime_data.listen_coordinator.alerts.get((device_api_id, kind)) if ring_entry else None
+            if alert is None or alert.is_update:
+                return None
+            # A ring keeps its Ring id (push and /dings/active may differ in `now`); the unlock id is only a
+            # counter of the listener, so the time is part of its key
+            key = str(alert.id) if kind == "ding" else f"{alert.id}@{alert.now}"
+            return RingAlert(key, dt_util.utc_from_timestamp(float(alert.now)))
+        except (AttributeError, TypeError, ValueError) as err:
+            _LOGGER.warning("Ring-Alarm für %s nicht lesbar (Aufbau der Ring-Integration geändert?): %s", kind, err)
+            return None
+
+    return _lookup
+
+
 def _activity_handler(coordinator: IntercomCoordinator) -> Callable[[State], None]:
     @callback
     def _call(state: State) -> None:
@@ -230,5 +322,13 @@ def _watch_ring_entry(hass: HomeAssistant, entry: RingPlusConfigEntry, ring_entr
 
 async def async_unload_entry(hass: HomeAssistant, entry: RingPlusConfigEntry) -> bool:
     for coordinator in entry.runtime_data.intercoms:
+        # An opening already sent finishes first, so the reloaded entry sees the window used up
+        await coordinator.async_wait_for_open()
         coordinator.async_shutdown_timers()
     return await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
+
+
+async def async_remove_entry(hass: HomeAssistant, entry: RingPlusConfigEntry) -> None:
+    """Integration removed: delete the saved time window, schedule pause and "last opened"."""
+    await (await async_get_state(hass)).async_remove()
+    hass.data.pop(DATA_STATE, None)

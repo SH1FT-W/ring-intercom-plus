@@ -1,4 +1,4 @@
-"""Zahl: Öffnungsdauer des Türöffners (nur analoge Anlagen)."""
+"""Numbers: unlock duration (analog systems only) and the time window of "Next ring opens"."""
 
 from __future__ import annotations
 
@@ -9,7 +9,7 @@ from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 
 from . import RingPlusConfigEntry
 from .api import unlock_duration
-from .const import UNLOCK_DURATION_MAX, UNLOCK_DURATION_MIN
+from .const import AUTO_UNLOCK_WINDOW_MAX, AUTO_UNLOCK_WINDOW_MIN, UNLOCK_DURATION_MAX, UNLOCK_DURATION_MIN
 from .coordinator import IntercomCoordinator
 from .entity import RingPlusEntity
 
@@ -19,11 +19,12 @@ PARALLEL_UPDATES = 1
 async def async_setup_entry(
     hass: HomeAssistant, entry: RingPlusConfigEntry, async_add_entities: AddConfigEntryEntitiesCallback
 ) -> None:
-    async_add_entities(
-        UnlockDurationNumber(coordinator)
-        for coordinator in entry.runtime_data.intercoms
-        if unlock_duration(coordinator.data or {}) is not None
-    )
+    entities: list[NumberEntity] = []
+    for coordinator in entry.runtime_data.intercoms:
+        if unlock_duration(coordinator.data or {}) is not None:
+            entities.append(UnlockDurationNumber(coordinator))
+        entities.append(AutoUnlockWindowNumber(coordinator))
+    async_add_entities(entities)
 
 
 class UnlockDurationNumber(RingPlusEntity, NumberEntity):
@@ -46,3 +47,24 @@ class UnlockDurationNumber(RingPlusEntity, NumberEntity):
     async def async_set_native_value(self, value: float) -> None:
         settings = await self._run(self.coordinator.api.async_set_unlock_duration(self.coordinator.data, round(value)))
         self.coordinator.async_set_updated_data(settings)
+
+
+class AutoUnlockWindowNumber(RingPlusEntity, NumberEntity):
+    """How long "Next ring opens" stays on, in minutes. 1 = the intercom's own 60 s mode (default)."""
+
+    _attr_entity_category = EntityCategory.CONFIG
+    _attr_native_min_value = AUTO_UNLOCK_WINDOW_MIN
+    _attr_native_max_value = AUTO_UNLOCK_WINDOW_MAX
+    _attr_native_step = 1
+    _attr_native_unit_of_measurement = UnitOfTime.MINUTES
+    _attr_mode = NumberMode.BOX
+
+    def __init__(self, coordinator: IntercomCoordinator) -> None:
+        super().__init__(coordinator, "auto_unlock_window")
+
+    @property
+    def native_value(self) -> int:
+        return self.coordinator.auto_unlock_window
+
+    async def async_set_native_value(self, value: float) -> None:
+        await self.coordinator.async_set_auto_unlock_window(round(value))

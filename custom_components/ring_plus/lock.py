@@ -45,7 +45,11 @@ class DoorLock(RingPlusEntity, LockEntity):
         # Vergleich in konstanter Zeit, damit die Antwortzeit nichts über die PIN verrät
         if self._code and not hmac.compare_digest(str(kwargs.get(ATTR_CODE) or ""), self._code):
             raise ServiceValidationError(translation_domain=DOMAIN, translation_key="wrong_code")
-        await self._run(self.coordinator.async_open_door())
+        user = None
+        if self._context is not None and self._context.user_id:
+            ha_user = await self.hass.auth.async_get_user(self._context.user_id)
+            user = ha_user.name if ha_user is not None else None
+        await self._run(self.coordinator.async_open_door(user))
 
     async def async_lock(self, **kwargs: Any) -> None:
         # Die Intercom „verriegelt“ von selbst; nichts zu senden

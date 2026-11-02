@@ -33,6 +33,9 @@
     "number": {
       "unlock_duration": {
         "name": "Unlock duration"
+      },
+      "auto_unlock_window": {
+        "name": "Next ring opens: time window"
       }
     },
     "sensor": {
@@ -44,6 +47,24 @@
       },
       "unlock_mode": {
         "name": "Unlock mode"
+      },
+      "last_opened": {
+        "name": "Last opened",
+        "state_attributes": {
+          "source": {
+            "name": "Source",
+            "state": {
+              "home_assistant": "Home Assistant door opener",
+              "auto_unlock": "Next ring opens (Home Assistant)",
+              "ring_app": "Ring app or other Ring client",
+              "ring_history": "Ring history",
+              "unknown": "Unknown"
+            }
+          },
+          "user": {
+            "name": "User"
+          }
+        }
       }
     },
     "switch": {
@@ -52,6 +73,14 @@
         "state_attributes": {
           "until": {
             "name": "Until"
+          },
+          "mode": {
+            "name": "Mode",
+            "state": {
+              "ring": "Intercom (60 s)",
+              "window": "Home Assistant (time window)",
+              "schedule": "Schedule"
+            }
           }
         }
       },
@@ -69,15 +98,39 @@
     },
     "settings_unreadable": {
       "message": "Intercom settings not readable: {error}"
+    },
+    "window_out_of_range": {
+      "message": "The time window must be between {min} and {max} minutes."
+    },
+    "not_auto_unlock": {
+      "message": "The action works only on the switch \"Next ring opens\"."
+    },
+    "no_user_id": {
+      "message": "Ring did not return the user ID of the account, so the intercom's own 1 minute mode is not available. Use a time window of 2 minutes or more."
     }
   },
   "options": {
     "step": {
       "init": {
+        "title": "Options",
+        "description": "What would you like to change?",
+        "menu_options": {
+          "pin": "PIN for the door opener",
+          "auto_unlock": "Schedule for \"Next ring opens\""
+        }
+      },
+      "pin": {
         "title": "Door opener PIN",
         "description": "Optional PIN that lock.unlock has to pass as code before the door opens (4 to 8 digits). Leave empty for no PIN: then every unlock call opens the door, including voice assistants, dashboards and automations. Current setting: {state}.",
         "data": {
           "unlock_code": "PIN"
+        }
+      },
+      "auto_unlock": {
+        "title": "Schedule for \"Next ring opens\"",
+        "description": "Optional schedule helper. While it is on, Home Assistant opens the door on every ring that arrives by push. Switching \"Next ring opens\" off pauses the current period. Leave empty for no schedule.",
+        "data": {
+          "auto_unlock_schedule": "Schedule"
         }
       }
     },
@@ -89,6 +142,18 @@
     "push_missing": {
       "title": "Ring push messages for {name} are not arriving",
       "description": "Home Assistant learned about the last rings of **{name}** only from the Ring integration's regular activity check, not from its instant push messages. Ring Intercom Plus still detects them, about a minute later.\n\nTo get instant rings back, reload or reconfigure the official Ring integration (Settings → Devices & services → Ring). This message disappears with the next ring that arrives by push."
+    }
+  },
+  "services": {
+    "next_ring_opens": {
+      "name": "Next ring opens for a time window",
+      "description": "Switches \"Next ring opens\" on for the given time. The next ring that arrives by push within this time opens the door, then the switch turns off. 1 minute uses the intercom's own 60 s mode.",
+      "fields": {
+        "duration": {
+          "name": "Duration",
+          "description": "1 minute to 8 hours. Default: the time window set on the device."
+        }
+      }
     }
   }
 }

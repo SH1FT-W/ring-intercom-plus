@@ -39,7 +39,11 @@ def ring_entry(hass: HomeAssistant, ring: FakeRing) -> MockConfigEntry:
     entry = MockConfigEntry(domain="ring", title="Ring", data={})
     entry.add_to_hass(hass)
     entry.mock_state(hass, ConfigEntryState.LOADED)
-    entry.runtime_data = SimpleNamespace(api=ring, devices=SimpleNamespace(all_devices=[fake_intercom()]))
+    entry.runtime_data = SimpleNamespace(
+        api=ring,
+        devices=SimpleNamespace(all_devices=[fake_intercom()]),
+        listen_coordinator=SimpleNamespace(alerts={}),
+    )
     devices = dr.async_get(hass)
     device = devices.async_get_or_create(
         config_entry_id=entry.entry_id, identifiers={("ring", MAC)}, name="Main Entrance"

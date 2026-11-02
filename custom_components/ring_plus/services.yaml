@@ -1,0 +1,9 @@
+next_ring_opens:
+  target:
+    entity:
+      integration: ring_plus
+      domain: switch
+  fields:
+    duration:
+      selector:
+        duration:

@@ -7,6 +7,7 @@ from types import SimpleNamespace
 from conftest import DING_ENTITY
 from homeassistant.config_entries import ConfigEntryState
 from homeassistant.core import HomeAssistant
+from homeassistant.exceptions import ServiceValidationError
 from homeassistant.helpers import device_registry as dr, entity_registry as er
 import pytest
 from pytest_homeassistant_custom_component.common import MockConfigEntry
@@ -18,6 +19,8 @@ EXPECTED = {
     "switch.front_door_nachstes_klingeln_offnet": "off",
     "switch.front_door_ring_to_open": "off",
     "number.front_door_offnungsdauer": "3",
+    "number.front_door_nachstes_klingeln_offnet_zeitfenster": "1",
+    "sensor.front_door_zuletzt_geoffnet": "unknown",
     "binary_sensor.front_door_anruf_aktiv": "off",
     "binary_sensor.front_door_klingel": "off",
     "lock.front_door_turoffner": "locked",
@@ -76,7 +79,7 @@ async def test_ring_structure_changed(hass: HomeAssistant, ring: FakeRing, ring_
 async def test_profile_without_id(
     hass: HomeAssistant, ring: FakeRing, ring_entry: MockConfigEntry, broken: str
 ) -> None:
-    """Ohne Benutzer-ID gibt es kein „Nächstes Klingeln öffnet“, der Rest läuft."""
+    """Without the user ID only the intercom's own 1 minute mode is missing; the switch stays (to switch off)."""
     if broken == "missing_id":
         ring.profile = {"name": "ohne id"}
     else:
@@ -86,8 +89,18 @@ async def test_profile_without_id(
     entry.add_to_hass(hass)
     assert await hass.config_entries.async_setup(entry.entry_id)
     await hass.async_block_till_done()
-    assert hass.states.get("switch.front_door_nachstes_klingeln_offnet") is None
+    auto = "switch.front_door_nachstes_klingeln_offnet"
+    assert hass.states.get(auto).state == "off"
     assert hass.states.get("lock.front_door_turoffner").state == "locked"
+    with pytest.raises(ServiceValidationError, match="user ID"):
+        await hass.services.async_call("switch", "turn_on", {"entity_id": auto}, blocking=True)
+    await hass.services.async_call(
+        "ring_plus", "next_ring_opens", {"entity_id": auto, "duration": {"minutes": 30}}, blocking=True
+    )
+    assert hass.states.get(auto).state == "on"
+    await hass.services.async_call("switch", "turn_off", {"entity_id": auto}, blocking=True)
+    assert hass.states.get(auto).state == "off"
+    assert not [call for call in ring.calls if call[1].endswith("/device_rpc") and "autounlock" in str(call[2])]
 
 
 async def test_ring_unloaded_at_runtime(

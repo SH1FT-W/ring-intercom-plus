@@ -21,6 +21,31 @@ SETTINGS_INTERVAL: Final = timedelta(minutes=5)
 # „Nächstes Klingeln öffnet“: die App schickt immer 60 Sekunden
 AUTO_UNLOCK_WINDOW: Final = 60
 
+# Time window for "Next ring opens", in minutes. 1 = the intercom's own 60 s mode (default, as before);
+# longer windows are handled by Home Assistant: it opens the door itself when the ring arrives by push.
+CONF_AUTO_UNLOCK_SCHEDULE: Final = "auto_unlock_schedule"
+AUTO_UNLOCK_WINDOW_MIN: Final = 1
+AUTO_UNLOCK_WINDOW_MAX: Final = 480  # 8 hours: never open-ended without a schedule
+MODE_RING: Final = "ring"  # intercom's own mode (set_autounlock_mode, 60 s)
+MODE_WINDOW: Final = "window"  # Home Assistant opens on the next ring within the window
+MODE_SCHEDULE: Final = "schedule"  # Home Assistant opens on every ring while the schedule is on
+# Only a ring this recent (Ring's own time of the alert) opens the door
+EVENT_MAX_AGE: Final = timedelta(seconds=30)
+SERVICE_NEXT_RING_OPENS: Final = "next_ring_opens"
+ATTR_DURATION: Final = "duration"
+
+# "Last opened": who or what opened the door
+SOURCE_HOME_ASSISTANT: Final = "home_assistant"
+SOURCE_AUTO_UNLOCK: Final = "auto_unlock"
+SOURCE_RING_APP: Final = "ring_app"
+SOURCE_RING_HISTORY: Final = "ring_history"
+SOURCE_UNKNOWN: Final = "unknown"
+OPEN_SOURCES: Final = (SOURCE_HOME_ASSISTANT, SOURCE_AUTO_UNLOCK, SOURCE_RING_APP, SOURCE_RING_HISTORY, SOURCE_UNKNOWN)
+# Own unlock and the unlock push Ring sends for it = the same opening
+OWN_UNLOCK_MATCH: Final = timedelta(seconds=30)
+# Ring history kind for an unlock (ring_doorbell RingEventKind.INTERCOM_UNLOCK)
+KIND_INTERCOM_UNLOCK: Final = "intercom_unlock"
+
 # Öffnungsdauer: App erlaubt 1–10 s, Vorgabe 3 s
 UNLOCK_DURATION_MIN: Final = 1
 UNLOCK_DURATION_MAX: Final = 10

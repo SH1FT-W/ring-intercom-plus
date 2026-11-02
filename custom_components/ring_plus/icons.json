@@ -25,6 +25,9 @@
     "number": {
       "unlock_duration": {
         "default": "mdi:timer-lock-open-outline"
+      },
+      "auto_unlock_window": {
+        "default": "mdi:timer-lock-open-outline"
       }
     },
     "sensor": {
@@ -36,6 +39,9 @@
       },
       "unlock_mode": {
         "default": "mdi:lock-question"
+      },
+      "last_opened": {
+        "default": "mdi:door-open"
       }
     },
     "switch": {
@@ -48,6 +54,11 @@
       "ring_to_open": {
         "default": "mdi:bell-ring-outline"
       }
+    }
+  },
+  "services": {
+    "next_ring_opens": {
+      "service": "mdi:door-open"
     }
   }
 }

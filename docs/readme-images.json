@@ -108,7 +108,7 @@
       {
         "icon": "flask-outline",
         "title": "Next ring opens",
-        "text": "Experimental: the next ring within 60 seconds opens the door. Taken from the guest access of the Ring app."
+        "text": "Experimental: the next ring within 60 seconds, or a time window of up to 8 hours or a schedule, opens the door."
       }
     ],
     "entities": [
@@ -120,7 +120,7 @@
       {
         "icon": "toggle-switch-outline",
         "title": "Switches",
-        "text": "Ring-to-Open and Next ring opens (experimental, attribute until)."
+        "text": "Ring-to-Open and Next ring opens (experimental, attributes until and mode)."
       },
       {
         "icon": "bell-outline",

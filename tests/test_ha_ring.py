@@ -10,6 +10,7 @@ See docs/ha-annahmen.md.
 from __future__ import annotations
 
 from collections.abc import Callable, Generator
+from datetime import timedelta
 import inspect
 import json
 import time
@@ -236,3 +237,84 @@ async def test_last_activity_fallback_reaches_ring_plus(
     assert state.attributes["category"] == "ding"
     assert dt_util.parse_datetime(str(state.attributes["created_at"])) == created
     assert hass.states.get("binary_sensor.front_door_klingel").state == "on"
+
+
+async def _arm_window(hass: HomeAssistant, minutes: int = 30) -> None:
+    await hass.services.async_call(
+        "ring_plus",
+        "next_ring_opens",
+        {"entity_id": "switch.front_door_nachstes_klingeln_offnet", "duration": {"minutes": minutes}},
+        blocking=True,
+    )
+    await hass.async_block_till_done()
+
+
+async def test_push_alert_shape_and_auto_open(
+    hass: HomeAssistant, ring: FakeRing, ring_entry: MockConfigEntry, setup: MockConfigEntry
+) -> None:
+    """Auto-open reads `listen_coordinator.alerts[(api_id, kind)]` (ring_doorbell RingEvent: id, now, is_update)."""
+    await _arm_window(hass)
+    (listener,) = FakeListener.instances
+    listener.push("ding")
+    await hass.async_block_till_done()
+    alert = ring_entry.runtime_data.listen_coordinator.alerts[(DEVICE_API_ID, "ding")]
+    assert isinstance(alert, RingEvent) and alert.is_update is False
+    assert abs(time.time() - float(alert.now)) < 5 and alert.id
+    assert ring.rpcs("unlock_door") == [{"door_id": 0, "user_id": -1}]
+
+
+async def test_unlock_push_fires_ding_entity_again_without_opening(
+    hass: HomeAssistant, ring: FakeRing, ring_entry: MockConfigEntry, setup: MockConfigEntry
+) -> None:
+    """HA Ring fires the ding event entity again for any event of the device while the ding alert is active.
+
+    Rang before the window was armed, then someone opens with the app: the ding entity fires, the door
+    must not open a second time.
+    """
+    (listener,) = FakeListener.instances
+    listener.push("ding")
+    await hass.async_block_till_done()
+    ding = _ring_entity(hass, "event", "ding")
+    first = hass.states.get(ding).state
+    await _arm_window(hass)
+    listener.push("intercom_unlock")
+    await hass.async_block_till_done()
+    assert hass.states.get(ding).state != first  # fired again (the assumption this guards against)
+    assert ring.rpcs("unlock_door") == []
+    assert hass.states.get("switch.front_door_nachstes_klingeln_offnet").state == "on"
+    assert hass.states.get("sensor.front_door_zuletzt_geoffnet").attributes["source"] == "ring_app"
+
+
+async def test_ring_reload_does_not_open(
+    hass: HomeAssistant, ring: FakeRing, ring_entry: MockConfigEntry, setup: MockConfigEntry
+) -> None:
+    """After a reload of the Ring integration the event entities come back with their old state: no opening."""
+    (listener,) = FakeListener.instances
+    listener.push("ding")
+    await hass.async_block_till_done()
+    ding = _ring_entity(hass, "event", "ding")
+    last = hass.states.get(ding).state
+    await _arm_window(hass)
+    assert hass.states.get("switch.front_door_nachstes_klingeln_offnet").state == "on"
+    calls = len(ring.rpcs("unlock_door"))
+
+    assert await hass.config_entries.async_reload(ring_entry.entry_id)
+    await hass.async_block_till_done()
+    assert hass.states.get(ding).state == last  # restored, not new
+    assert len(ring.rpcs("unlock_door")) == calls
+    assert hass.states.get("switch.front_door_nachstes_klingeln_offnet").state == "on"  # window kept
+
+
+async def test_unlock_in_ring_history_reaches_last_opened(
+    hass: HomeAssistant, cloud: FakeCloud, ring_entry: MockConfigEntry, setup: MockConfigEntry
+) -> None:
+    """`last_activity` passes the history kind as `category`; an `intercom_unlock` entry sets "last opened"."""
+    created = (dt_util.utcnow() - timedelta(minutes=20)).replace(microsecond=0)
+    cloud.history = [
+        {"id": 2, "kind": "intercom_unlock", "created_at": created.strftime("%Y-%m-%dT%H:%M:%SZ"), "answered": False}
+    ]
+    await ring_entry.runtime_data.devices_coordinator.async_refresh()
+    await hass.async_block_till_done()
+    state = hass.states.get("sensor.front_door_zuletzt_geoffnet")
+    assert dt_util.parse_datetime(state.state) == created
+    assert state.attributes["source"] == "ring_history"

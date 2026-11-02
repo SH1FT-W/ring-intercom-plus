@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Awaitable
 
-from homeassistant.exceptions import HomeAssistantError
+from homeassistant.exceptions import HomeAssistantError, ServiceValidationError
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from .const import DOMAIN
@@ -28,6 +28,8 @@ class RingPlusEntity(CoordinatorEntity[IntercomCoordinator]):
         """Befehl ausführen; jeder Fehler der Ring-Cloud wird eine übersetzte Meldung in der Oberfläche."""
         try:
             return await call
+        except ServiceValidationError:
+            raise  # already translated, wrong input rather than a Ring error
         except Exception as err:
             raise HomeAssistantError(
                 translation_domain=DOMAIN,

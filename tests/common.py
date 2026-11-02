@@ -80,3 +80,17 @@ def fake_intercom() -> SimpleNamespace:
     return SimpleNamespace(
         id=DEVICE_API_ID, device_api_id=DEVICE_API_ID, device_id=MAC, name="Front Door", kind="intercom_handset_audio"
     )
+
+
+_alert_ids = iter(range(1, 1_000_000))
+
+
+def push_alert(hass: Any, kind: str, when: Any = None, alert_id: int | None = None) -> None:
+    """Active alert of the Ring push listener, as the HA Ring integration keeps it (listen_coordinator.alerts)."""
+    from homeassistant.util import dt as dt_util
+
+    ring_entry = hass.config_entries.async_entries("ring")[0]
+    stamp = (when or dt_util.utcnow()).timestamp()
+    ring_entry.runtime_data.listen_coordinator.alerts[(DEVICE_API_ID, kind)] = SimpleNamespace(
+        id=alert_id if alert_id is not None else next(_alert_ids), now=stamp, is_update=False
+    )

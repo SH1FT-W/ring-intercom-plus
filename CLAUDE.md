@@ -21,9 +21,18 @@ ersetzen. An echter Hardware geprüft: Ring Intercom (Audio).
 - Klingeln/Entsperren kommen aus den Event-Entitäten von `ring` (unique_id `<api_id>-ding` / `-intercom_unlock`),
   keine zweite Push-Verbindung. Die Handler werden über Registry-Ereignisse neu aufgesetzt (Umbenennung, späteres
   Auftauchen); `SIGNAL_CONFIG_ENTRY_CHANGED` des `ring`-Eintrags (Wechsel nach LOADED oder REMOVED) lädt Ring Intercom Plus neu.
-- Optionen: `unlock_code` (PIN 4 bis 8 Ziffern, `CODE_FORMAT`); gesetzt → `lock` zeigt `code_format`, HA prüft Format,
-  `async_unlock` den Wert (konstante Zeit). Standard ohne PIN (dann öffnen auch Dashboards/Automationen ohne Code).
-  Optionsänderung = Reload.
+- Optionen (Menü: PIN, Zeitplan; jeder Schritt behält die andere Option): `unlock_code` (PIN 4 bis 8 Ziffern,
+  `CODE_FORMAT`); gesetzt → `lock` zeigt `code_format`, HA prüft Format, `async_unlock` den Wert (konstante Zeit).
+  Standard ohne PIN (dann öffnen auch Dashboards/Automationen ohne Code). Optionsänderung = Reload.
+- „Nächstes Klingeln öffnet“: Zeitfenster 1 min (Standard) = Intercom-eigener Modus (`set_autounlock_mode`, 60 s);
+  2 min bis 8 h und Zeitplan (Option `auto_unlock_schedule`) = HA öffnet selbst per `unlock_door`, nur bei
+  neuem Ring-Push-Alarm (`listen_coordinator.alerts`, neue Ring-`id`, `now` ≤ 30 s; die Event-Entitäten feuern bei
+  jedem Geräte-Ereignis erneut, solange ein Alarm lebt) und nie über den Ersatzweg „Letzte Aktivität“. Fenster
+  einmalig, Zeitplan bei jedem Klingeln; Aus im Zeitplan pausiert, bis der Zeitplan wirklich `off` ist (Einschalten
+  hebt die Pause nicht auf, Aus wirkt HA-seitig auch, wenn Ring das Entschärfen ablehnt). Schalter
+  und Zeitfenster gibt es auch ohne Benutzer-ID (dann nur kein 1-Minuten-Modus). Zeitfenster (auch 60 s),
+  Pause, zuletzt gesehenes Klingeln und „Zuletzt geöffnet“ liegen in `storage.py` (ein Store je HA-Lauf in
+  `hass.data`, sofort gespeichert), neustartfest.
 - Fehler-Wrapper `_run` in `entity.py`, nicht je Plattform kopieren.
 - `api.py` ohne HA, testbar. Einstellungen alle 5 Min (`GET devices/v1/devices/<id>/settings`), nach Änderung sofort.
 - Wer von ring-mqtt kommt, kann die neuen Entitäten auf die alten Entity-IDs umbenennen; Automationen und Dashboards

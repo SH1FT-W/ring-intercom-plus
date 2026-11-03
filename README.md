@@ -10,7 +10,7 @@ Runs next to the official Ring integration and uses its login.</p>
 
 [![Version](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2FSH1FT-W%2Fring-intercom-plus%2Fmain%2Fcustom_components%2Fring_plus%2Fmanifest.json&query=%24.version&label=version&style=flat-square&color=1998D5&labelColor=111111)](https://github.com/SH1FT-W/ring-intercom-plus/releases/latest)
 [![Home Assistant](https://img.shields.io/badge/Home%20Assistant-2026.9%2B-1998D5?style=flat-square&labelColor=111111&logo=homeassistant&logoColor=white)](https://www.home-assistant.io)
-[![HACS](https://img.shields.io/badge/HACS-custom%20repository-1998D5?style=flat-square&labelColor=111111)](https://hacs.xyz)
+[![Marketplace](https://img.shields.io/badge/Marketplace-custom%20repository-1998D5?style=flat-square&labelColor=111111)](https://hacs.xyz)
 [![IoT class](https://img.shields.io/badge/iot-cloud%20polling-1998D5?style=flat-square&labelColor=111111)](https://developers.home-assistant.io/docs/creating_integration_manifest/#iot-class)
 [![Quality scale](https://img.shields.io/badge/quality%20scale-silver%20(self--assessed)-1998D5?style=flat-square&labelColor=111111)](custom_components/ring_plus/quality_scale.yaml)
 [![License](https://img.shields.io/badge/license-Apache%202.0-1998D5?style=flat-square&labelColor=111111)](LICENSE)
@@ -129,9 +129,11 @@ The official Ring integration learns about rings through instant push messages. 
 
 **Requirements:** Home Assistant 2026.9 or newer and the **official Ring integration**, set up and showing the intercom as a device.
 
-### HACS (custom repository)
+### Marketplace (custom repository)
 
-1. In HACS, open the three dots menu, choose **Custom repositories** and add `https://github.com/SH1FT-W/ring-intercom-plus` with the type **Integration**.
+The Marketplace is under Settings → Marketplace. On Home Assistant before 2026.11 it is still called HACS.
+
+1. In the Marketplace, open the three dots menu, choose **Custom repositories** and add `https://github.com/SH1FT-W/ring-intercom-plus` with the type **Integration**.
 2. Search for **Ring Intercom Plus**, download it and restart Home Assistant.
 
 ### Manual
@@ -181,7 +183,7 @@ When you open an [issue](https://github.com/SH1FT-W/ring-intercom-plus/issues), 
 ## Removal
 
 1. **Settings > Devices & services > Ring Intercom Plus > three dots > Delete.**
-2. Delete the folder `/config/custom_components/ring_plus` (or remove the repository in HACS) and restart Home Assistant.
+2. Delete the folder `/config/custom_components/ring_plus` (or remove the repository in the Marketplace) and restart Home Assistant.
 
 The Ring integration and its device stay untouched.
 

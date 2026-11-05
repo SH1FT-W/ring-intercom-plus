@@ -5,90 +5,124 @@
   <img src="docs/images/readme-title-light.webp" alt="Ring Intercom Plus: Your Ring Intercom, with the missing switches. The feature overview of the project page in a window." />
 </picture>
 
-<p>Door opener, ding, call active, last opened, Ring-to-Open, unlock duration and restart for the <b>Ring Intercom</b>.<br/>
-Runs next to the official Ring integration and uses its login.</p>
-
 [![Version](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2FSH1FT-W%2Fring-intercom-plus%2Fmain%2Fcustom_components%2Fring_plus%2Fmanifest.json&query=%24.version&label=version&style=flat-square&color=1998D5&labelColor=111111)](https://github.com/SH1FT-W/ring-intercom-plus/releases/latest)
 [![Home Assistant](https://img.shields.io/badge/Home%20Assistant-2026.9%2B-1998D5?style=flat-square&labelColor=111111&logo=homeassistant&logoColor=white)](https://www.home-assistant.io)
 [![Marketplace](https://img.shields.io/badge/Marketplace-custom%20repository-1998D5?style=flat-square&labelColor=111111)](https://hacs.xyz)
-[![IoT class](https://img.shields.io/badge/iot-cloud%20polling-1998D5?style=flat-square&labelColor=111111)](https://developers.home-assistant.io/docs/creating_integration_manifest/#iot-class)
-[![Quality scale](https://img.shields.io/badge/quality%20scale-silver%20(self--assessed)-1998D5?style=flat-square&labelColor=111111)](custom_components/ring_plus/quality_scale.yaml)
-[![License](https://img.shields.io/badge/license-Apache%202.0-1998D5?style=flat-square&labelColor=111111)](LICENSE)
 
-<p><a href="https://sh1ft-w.github.io/ring-intercom-plus"><b>Website</b></a> &nbsp;·&nbsp; <a href="#features">Features</a> &nbsp;·&nbsp; <a href="#entities">Entities</a> &nbsp;·&nbsp; <a href="#installation">Install</a> &nbsp;·&nbsp; <a href="#options-pin-for-the-door-opener">PIN</a> &nbsp;·&nbsp; <a href="#troubleshooting">Troubleshooting</a> &nbsp;·&nbsp; <a href="CHANGELOG.md">Changelog</a></p>
+<a href="https://sh1ft-w.github.io/ring-intercom-plus"><b>Website</b></a>&emsp;<a href="#install">Install</a>&emsp;<a href="#set-up">Set up</a>&emsp;<a href="#entities">Entities</a>&emsp;<a href="#next-ring-opens">Next ring opens</a>&emsp;<a href="CHANGELOG.md">Changelog</a>
 
 </div>
 
 <br/>
 
-Ring Intercom Plus adds the intercom functions that the official [Ring integration](https://www.home-assistant.io/integrations/ring/) does not offer: opening the door as a lock entity with an optional PIN, a ding sensor, "call active", Ring-to-Open, the unlock duration and a restart button. It has **no login of its own**: it uses the Ring integration's connection to the Ring cloud, so there is nothing to enter during setup.
+The switches of the Ring app for your **Ring Intercom** in Home Assistant: **open the door, with an optional PIN, see the ding and an active call, set Ring-to-Open and the unlock duration, restart it.** It runs next to the official [Ring integration](https://www.home-assistant.io/integrations/ring/) and uses its login, so there is nothing to enter.
+
+Everything goes through the Ring cloud, using the requests the Ring app sends. Ring does not document or support them and can change them at any time; single entities may then stop working until the integration is adapted.
 
 > [!WARNING]
-> **The door opener opens a real door.** Without a PIN it does so on every `lock.unlock` call, from anything that can reach the lock: **voice assistants, dashboards, automations, scripts** and anyone with access to your Home Assistant. If you do not want that, set a PIN in the options (see below) and do not expose the lock to voice assistants.
+> **The door opener opens a real door.** Without a PIN it does so on every `lock.unlock` call: voice assistants, dashboards, automations, scripts and anyone with access to your Home Assistant. Set a PIN in the options and do not expose the lock to voice assistants if you do not want that.
 
-> [!CAUTION]
-> Ring Intercom Plus uses the **unofficial Ring API** (the requests the Ring app sends). Ring does not document or support it and can change it at any time; single entities may then stop working until the integration is adapted. All commands go through the **Ring cloud**; nothing here is local.
+## What it adds to the Ring integration
 
-> [!NOTE]
-> Ring Intercom Plus is an independent project. It is not affiliated with, endorsed by or sponsored by Ring LLC or Amazon. Ring is a trademark of Ring LLC or its affiliates.
+|  | Ring integration | With Ring Intercom Plus |
+|:--|:--:|:--:|
+| Login to the Ring account | ✓ | uses Ring's |
+| Ring and unlock events | ✓ | ✓ |
+| Open the door | button | lock with optional PIN |
+| Ding sensor, call active, last opened | | ✓ |
+| Next ring opens (experimental) | | ✓ |
+| Ring-to-Open, unlock duration, restart | | ✓ |
 
-<a id="features"></a>
-## Features
+**New in 26.11:** Next ring opens with a time window of up to 8 hours or a schedule, and a Last opened sensor (in beta 26.11.2b1). Every change is in the [changelog](CHANGELOG.md).
 
-<!-- cards:features -->
-<table>
-<tr><td width="50%" valign="top"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/icons/lock-open-variant-outline-dark.svg"><img src="docs/images/icons/lock-open-variant-outline-light.svg" width="22" height="22" align="absmiddle" alt=""></picture> <b>Door opener</b><br>A lock entity that buzzes the door open and shows "unlocked" for 5 seconds, also when the door is opened from the Ring app.</td><td width="50%" valign="top"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/icons/form-textbox-password-dark.svg"><img src="docs/images/icons/form-textbox-password-light.svg" width="22" height="22" align="absmiddle" alt=""></picture> <b>Optional PIN</b><br>With a PIN of 4 to 8 digits the lock opens only with the right code, in dashboards, automations and voice assistants alike.</td></tr>
-<tr><td width="50%" valign="top"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/icons/bell-ring-outline-dark.svg"><img src="docs/images/icons/bell-ring-outline-light.svg" width="22" height="22" align="absmiddle" alt=""></picture> <b>Ding and call active</b><br>A ding sensor that stays on for 20 seconds and a call sensor that follows the conversation for up to 3 minutes.</td><td width="50%" valign="top"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/icons/tune-variant-dark.svg"><img src="docs/images/icons/tune-variant-light.svg" width="22" height="22" align="absmiddle" alt=""></picture> <b>Settings of the app</b><br>Ring-to-Open, unlock duration (1 to 10 s, analog systems) and a restart button, read every 5 minutes and after each change.</td></tr>
-<tr><td width="50%" valign="top"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/icons/link-variant-dark.svg"><img src="docs/images/icons/link-variant-light.svg" width="22" height="22" align="absmiddle" alt=""></picture> <b>Uses the Ring integration</b><br>No second login and no second push connection: rings and unlocks come from the event entities of the official integration.</td><td width="50%" valign="top"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/icons/flask-outline-dark.svg"><img src="docs/images/icons/flask-outline-light.svg" width="22" height="22" align="absmiddle" alt=""></picture> <b>Next ring opens</b><br>Experimental: the next ring within 60 seconds, or a time window of up to 8 hours or a schedule, opens the door.</td></tr>
-</table>
-<!-- /cards:features -->
+<a id="install"></a>
+## Install
 
-- **Door opener** as a lock: opens the door and shows "unlocked" for 5 seconds, also when the door is opened from the Ring app.
-- **Optional PIN** for the door opener (4 to 8 digits), checked for every `lock.unlock`.
-- **Ding** sensor (on for 20 seconds after each ring) and **Call active** (polled after a ring until the conversation ends, at most 3 minutes).
-- **Next ring opens** (experimental): for 60 seconds as in the Ring app, or for a time window of up to 8 hours, or while a schedule helper is on.
-- **Last opened**: when the door was last opened, and how (Home Assistant with user, Ring app, Next ring opens, Ring history).
-- **Ring-to-Open**, **unlock duration** (1 to 10 seconds, analog systems only) and **restart**, like in the Ring app.
-- Rings and unlocks are read from the event entities of the Ring integration: **no second push connection** to Ring. Settings are read every 5 minutes and right after each change.
-- All entities are attached to the device of the Ring integration, so the intercom stays one device.
-- English and German.
+Ring Intercom Plus is a custom repository. Under **Settings > Marketplace** (called HACS before Home Assistant 2026.11), open the three dots menu, choose **Custom repositories** and add `https://github.com/SH1FT-W/ring-intercom-plus` with the type **Integration**. Then search for **Ring Intercom Plus**, download it and restart Home Assistant.
 
-**Tested on:** Ring Intercom (Audio). The video model uses the same commands but is not tested.
+<details>
+<summary>Install by hand</summary>
+
+1. Download the [latest release](https://github.com/SH1FT-W/ring-intercom-plus/releases/latest).
+2. Copy `custom_components/ring_plus` into `/config/custom_components/` and restart Home Assistant.
+
+</details>
+
+<a id="set-up"></a>
+## Set up
+
+The **official Ring integration** must be set up and show the intercom as a device, with its event entities for ding and intercom unlock enabled.
+
+1. **Add the integration.** **Settings > Devices & services > Add integration > Ring Intercom Plus.** It finds the Ring integration and its intercoms by itself; without Ring the setup stops with a message.
+2. **Set a PIN** (recommended). **Configure > PIN for the door opener**, 4 to 8 digits. From then on the lock opens only with the right code, in dashboards, automations and voice assistants alike. Leave the field empty to remove it.
+3. **Pick a schedule** (optional). **Configure > Schedule for "Next ring opens"**, see [below](#next-ring-opens).
+
+The entities sit on the intercom's device of the Ring integration. Coming from ring-mqtt, you can rename them to your old entity IDs; automations and dashboards then keep working.
 
 <a id="entities"></a>
 ## Entities
 
-<!-- cards:entities -->
-<table>
-<tr><td width="50%" valign="top"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/icons/lock-outline-dark.svg"><img src="docs/images/icons/lock-outline-light.svg" width="22" height="22" align="absmiddle" alt=""></picture> <b>Lock</b><br>Door opener, with an optional PIN as code.</td><td width="50%" valign="top"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/icons/toggle-switch-outline-dark.svg"><img src="docs/images/icons/toggle-switch-outline-light.svg" width="22" height="22" align="absmiddle" alt=""></picture> <b>Switches</b><br>Ring-to-Open and Next ring opens (experimental, attributes until and mode).</td></tr>
-<tr><td width="50%" valign="top"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/icons/bell-outline-dark.svg"><img src="docs/images/icons/bell-outline-light.svg" width="22" height="22" align="absmiddle" alt=""></picture> <b>Binary sensors</b><br>Ding (20 s on after each ring) and Call active.</td><td width="50%" valign="top"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/icons/timer-outline-dark.svg"><img src="docs/images/icons/timer-outline-light.svg" width="22" height="22" align="absmiddle" alt=""></picture> <b>Number</b><br>Unlock duration, 1 to 10 seconds, only on analog systems.</td></tr>
-<tr><td width="50%" valign="top"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/icons/restart-dark.svg"><img src="docs/images/icons/restart-light.svg" width="22" height="22" align="absmiddle" alt=""></picture> <b>Button</b><br>Restart the intercom.</td><td width="50%" valign="top"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/icons/stethoscope-dark.svg"><img src="docs/images/icons/stethoscope-light.svg" width="22" height="22" align="absmiddle" alt=""></picture> <b>Diagnostics</b><br>Hardware revision, intercom type and unlock mode.</td></tr>
-</table>
-<!-- /cards:entities -->
+IDs for an intercom named "Front Door". Names are in English and German.
 
-| Entity | Type | What it does |
-|---|---|---|
-| Door opener | lock | Opens the door, shows "unlocked" for 5 s (also when opened from the Ring app) |
-| Next ring opens | switch | **Experimental**, see below. Attributes `until` and `mode` |
-| Next ring opens: time window | number | 1 to 480 minutes, default 1 (= the intercom's own 60 seconds) |
-| Last opened | sensor | Time of the last opening, attributes `source` and `user`, see below |
-| Ring-to-Open | switch | On = Ring-to-Open, off = open directly, as in the Ring app |
-| Ding | binary sensor | On for 20 s after each ring |
-| Call active | binary sensor | Polled after a ring until the conversation ends (at most 3 minutes) |
-| Unlock duration | number | 1 to 10 s, only on analog systems |
-| Restart | button | Restarts the intercom |
-| Hardware revision, Intercom type, Unlock mode | diagnostic sensors | Read from the intercom |
+| Entity | Shows |
+|:--|:--|
+| `lock.front_door_door_opener` | Opens the door, shows unlocked for 5 seconds, also when opened from the Ring app |
+| `binary_sensor.front_door_ding` | On for 20 seconds after each ring |
+| `binary_sensor.front_door_call_active` | Followed after a ring until the conversation ends, at most 3 minutes |
+| `sensor.front_door_last_opened` | When the door was last opened, attributes `source` and `user`. Kept across restarts |
+| `switch.front_door_next_ring_opens` | Experimental, see [below](#next-ring-opens). Attributes `until` and `mode` |
+| `number.front_door_next_ring_opens_time_window` | 1 to 480 minutes, default 1 |
+| `switch.front_door_ring_to_open` | On = Ring-to-Open, off = open directly, as in the Ring app |
+| `number.front_door_unlock_duration` | 1 to 10 seconds, only on analog systems |
+| `button.front_door_restart` | Restarts the intercom |
 
-Entity IDs start with the device name of the Ring integration, for example `lock.front_door_door_opener`. Coming from ring-mqtt, you can rename the new entities to your old entity IDs; automations and dashboards then keep working.
+Diagnostic sensors: hardware revision, intercom type and unlock mode.
 
-### "Next ring opens" (experimental)
+<details>
+<summary>Sources of "Last opened"</summary>
 
-Switching it on opens the door on the next ring; the switch turns itself off afterwards. How long it waits is set with the number **Next ring opens: time window** or with the action below:
+| `source` | Meaning |
+|:--|:--|
+| `home_assistant` | The door opener of Ring Intercom Plus. `user` names the Home Assistant user, if the action came from one |
+| `auto_unlock` | Next ring opens with a time window or a schedule |
+| `ring_app` | An unlock from the Ring app or another Ring client (for example the "Open door" button of the Ring integration) |
+| `ring_history` | An unlock in the Ring history, seen through the Ring integration's "Last activity" |
+| `unknown` | An unlock while the intercom's own 60 second mode was armed, so it could be either |
 
-- **1 minute (default, as before):** the intercom itself opens on the next ring within 60 seconds. The command comes from the **guest access** feature of the Ring app. It was tested with an **owner account** and opened the door, but it is not an official Ring feature. When Ring opens the door this way, it sends **no ding event** to Home Assistant, so the ding sensor stays off and the switch turns off at the end of its 60 seconds.
-- **2 minutes to 8 hours:** Home Assistant opens the door itself (same command as the door opener) when the next ring **arrives by push**. Only a new ring counts that Ring reports as at most 30 seconds old; a ring that Home Assistant only learns about later from "Last activity" (see below) does **not** open the door, and the window stays on for the next ring. If opening fails, the window also stays on.
+Openings that Ring does not report (for example the button on the indoor handset) do not show up.
 
-The window survives restarts of Home Assistant and reloads. It is never longer than 8 hours. If Ring does not return the user ID of the account, only the 1 minute mode is not available.
+</details>
+
+<a id="next-ring-opens"></a>
+## Next ring opens
+
+Switch it on and the next ring opens the door; then the switch turns itself off. How long it waits is set with the time window number or the action `ring_plus.next_ring_opens`.
+
+| Time window | Who opens | Note |
+|:--|:--|:--|
+| 1 minute (default) | The intercom itself, within 60 seconds | From the guest access of the Ring app, tested with an owner account, not an official feature. Ring then sends no ding |
+| 2 minutes to 8 hours | Home Assistant, same command as the door opener | Only for a new ring that arrives by push (at most 30 seconds old). If opening fails, the window stays on |
+| Schedule helper is on | Home Assistant, on **every** ring by push | Switching the switch off pauses the schedule until it turns off |
+
+The window and a pause survive restarts. If Ring does not return the user ID of the account, only the 1 minute mode is missing.
+
+> [!WARNING]
+> With a time window or a schedule, **anyone who rings opens the door**, and the PIN does not apply. Use it only when you expect someone.
+
+## Examples
+
+Open the door with the PIN:
+
+```yaml
+action: lock.unlock
+target:
+  entity_id: lock.front_door_door_opener
+data:
+  code: "1234"
+```
+
+<details>
+<summary>Next ring opens for two hours</summary>
 
 ```yaml
 action: ring_plus.next_ring_opens
@@ -99,72 +133,30 @@ data:
     hours: 2
 ```
 
-`duration` is optional (1 minute to 8 hours); without it, the time window of the number entity is used.
+`duration` is optional (1 minute to 8 hours); without it, the time window number is used.
 
-**Schedule (optional):** in the options (**Configure > Schedule for "Next ring opens"**) you can pick a [schedule helper](https://www.home-assistant.io/integrations/schedule/). While it is on, Home Assistant opens the door on **every** ring that arrives by push, and the switch shows on with mode `schedule`. Switching the switch off pauses the schedule until it turns off (also across restarts); the period after that is active again. A schedule that is missing or unavailable counts as off for opening but does not end a pause. A schedule that is on around the clock stays paused until it turns off once. Switching "Next ring opens" on during a pause arms only its time window; the pause stays.
+</details>
 
-> [!WARNING]
-> With a time window or a schedule, **anyone who rings opens the door**, and the PIN of the door opener does not apply. Use it only when you expect someone.
+## Your data
 
-### "Last opened"
+- **No login of its own.** Ring Intercom Plus borrows the logged-in client of the Ring integration and stores no credentials.
+- **No second push connection.** Rings and unlocks come from the event entities of the Ring integration; commands go to the Ring cloud.
 
-The sensor shows when the door was last opened and, in the attribute `source`, how:
+## Good to know
 
-| `source` | Meaning |
-|---|---|
-| `home_assistant` | The door opener of Ring Intercom Plus. The attribute `user` names the Home Assistant user, if the action came from one |
-| `auto_unlock` | "Next ring opens" with a time window or a schedule (Home Assistant opened) |
-| `ring_app` | Ring reported an unlock from the Ring app or another Ring client (for example the "Open door" button of the Ring integration) |
-| `ring_history` | An unlock in the Ring history, seen through the Ring integration's "Last activity" |
-| `unknown` | Ring reported an unlock while the intercom's own 60 second mode was armed, so it could be either |
+- Tested on a Ring Intercom (Audio). The video model uses the same commands but is untested.
+- If the Ring integration stops getting push messages (a known problem), a ring is still detected from its "Last activity" about a minute later, and a repair suggests reloading Ring after two such rings in a row. Such a ring never opens the door.
+- A new intercom in the Ring integration appears only after reloading Ring Intercom Plus.
 
-Openings that Ring does not report (for example the button on the indoor handset) do not show up. The value survives restarts.
+<details>
+<summary>Troubleshooting</summary>
 
-### Rings without push
-
-The official Ring integration learns about rings through instant push messages. If those stop arriving (a known problem; reloading or reconfiguring the Ring integration usually fixes it), Ring Intercom Plus still detects a ring from the integration's regular "Last activity" check, about a minute later, and shows a repair issue after two such rings in a row.
-
-<a id="installation"></a>
-## Installation
-
-**Requirements:** Home Assistant 2026.9 or newer and the **official Ring integration**, set up and showing the intercom as a device.
-
-### Marketplace (custom repository)
-
-The Marketplace is under Settings → Marketplace. On Home Assistant before 2026.11 it is still called HACS.
-
-1. In the Marketplace, open the three dots menu, choose **Custom repositories** and add `https://github.com/SH1FT-W/ring-intercom-plus` with the type **Integration**.
-2. Search for **Ring Intercom Plus**, download it and restart Home Assistant.
-
-### Manual
-
-1. Download the [latest release](https://github.com/SH1FT-W/ring-intercom-plus/releases/latest).
-2. Copy the folder `custom_components/ring_plus` into `/config/custom_components/` and restart Home Assistant.
-
-## Setup
-
-**Settings > Devices & services > Add integration > Ring Intercom Plus.** There is nothing to enter: Ring Intercom Plus finds the Ring integration and its intercoms. If the Ring integration is not set up, the setup stops with a message.
-
-## Options: PIN for the door opener
-
-**Settings > Devices & services > Ring Intercom Plus > Configure > PIN for the door opener:** enter a PIN with 4 to 8 digits. From then on the lock asks for a code (`lock.unlock` with `code`) in dashboards, automations and voice assistants alike; a wrong or missing code opens nothing. Leave the field empty and save to remove the PIN. Default: no PIN.
-
-```yaml
-action: lock.unlock
-target:
-  entity_id: lock.front_door_door_opener
-data:
-  code: "1234"
-```
-
-## Troubleshooting
-
-- **"Retrying setup"** after start: the Ring integration is not loaded yet, or its internal structure changed (message in the log). Ring Intercom Plus loads by itself as soon as Ring is loaded.
-- **Ding does not react:** the event entities of the Ring integration (ding and intercom unlock) must be enabled. Renaming them is fine, Ring Intercom Plus follows the new ID.
-- **"Next ring opens" fails with "user ID":** Ring did not return the user ID of the account (see the log). The intercom's own 1 minute mode is then not available; time windows of 2 minutes or more and the schedule keep working.
-- **"Unlock duration" is missing:** it exists only on analog systems, as in the Ring app.
-- **Entities "unavailable":** the Ring integration is unloaded or Ring does not answer; once it is loaded again, Ring Intercom Plus reloads.
-- **A command fails with "Ring did not accept the command":** Ring rejected it or changed the API. Please open an issue with the log lines.
+- **"Retrying setup"** after start: the Ring integration is not loaded yet, or its internal structure changed (message in the log). Ring Intercom Plus loads by itself once Ring is loaded.
+- **Ding does not react.** The event entities of the Ring integration (ding and intercom unlock) must be enabled. Renaming them is fine.
+- **Next ring opens fails with "user ID".** Ring did not return the user ID (see the log). Time windows of 2 minutes or more and the schedule keep working.
+- **"Unlock duration" is missing.** It exists only on analog systems, as in the Ring app.
+- **Entities unavailable.** The Ring integration is unloaded or Ring does not answer; once it is loaded again, Ring Intercom Plus reloads.
+- **"Ring did not accept the command".** Ring rejected it or changed the API. Please open an issue with the log lines.
 - **Debug log:**
 
   ```yaml
@@ -173,31 +165,36 @@ data:
       custom_components.ring_plus: debug
   ```
 
-When you open an [issue](https://github.com/SH1FT-W/ring-intercom-plus/issues), please remove your email address, tokens and device IDs from log lines.
+When you open an [issue](https://github.com/SH1FT-W/ring-intercom-plus/issues), remove your email address, tokens and device IDs from the log lines.
 
-### Known limits
+</details>
 
-- A new intercom in the Ring integration appears in Ring Intercom Plus only after reloading Ring Intercom Plus.
-- "Next ring opens" is experimental (see above). With a time window or a schedule it needs working push messages of the Ring integration.
+<details>
+<summary>Remove</summary>
 
-## Removal
-
-1. **Settings > Devices & services > Ring Intercom Plus > three dots > Delete.**
-2. Delete the folder `/config/custom_components/ring_plus` (or remove the repository in the Marketplace) and restart Home Assistant.
+1. **Settings > Devices & services > Ring Intercom Plus > three dots > Delete**.
+2. Remove the repository in the Marketplace (or delete `/config/custom_components/ring_plus`) and restart Home Assistant.
 
 The Ring integration and its device stay untouched.
 
-## How it works
+</details>
 
-<!-- cards:how -->
-<table>
-<tr><td width="33%" valign="top"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/icons/home-assistant-dark.svg"><img src="docs/images/icons/home-assistant-light.svg" width="22" height="22" align="absmiddle" alt=""></picture> <b>Next to Ring</b><br>Borrows the logged-in client of the official Ring integration. No credentials in Ring Intercom Plus.</td><td width="33%" valign="top"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/icons/cloud-outline-dark.svg"><img src="docs/images/icons/cloud-outline-light.svg" width="22" height="22" align="absmiddle" alt=""></picture> <b>Ring cloud</b><br>Commands go through the Ring cloud, in the format the Ring app uses. Not a local connection.</td><td width="33%" valign="top"><picture><source media="(prefers-color-scheme: dark)" srcset="docs/images/icons/alert-outline-dark.svg"><img src="docs/images/icons/alert-outline-light.svg" width="22" height="22" align="absmiddle" alt=""></picture> <b>Unofficial API</b><br>Ring does not document this interface and can change it at any time.</td></tr>
-</table>
-<!-- /cards:how -->
+<details>
+<summary>How it works</summary>
 
-Ring Intercom Plus calls the authenticated client of the Ring integration (from [python-ring-doorbell](https://github.com/python-ring-doorbell/python-ring-doorbell)) for every request. The unlock command follows python-ring-doorbell; the other commands and settings follow the Ring app. Ring Intercom Plus never sends the intercom's calibration or setup commands. Details are in [`NOTICE`](NOTICE) and, in German, in [`CLAUDE.md`](CLAUDE.md).
+| What | How |
+|:--|:--|
+| Login and connection | The authenticated client of the Ring integration ([python-ring-doorbell](https://github.com/python-ring-doorbell/python-ring-doorbell)) |
+| Rings and unlocks | Event entities of the Ring integration, "Last activity" as fallback |
+| Settings | Read every 5 minutes and right after each change |
+| Commands | Through the Ring cloud. Unlock as in python-ring-doorbell, the rest as in the Ring app |
 
-## Development
+Ring Intercom Plus never sends the intercom's calibration or setup commands. Details are in [`NOTICE`](NOTICE) and, in German, in [`CLAUDE.md`](CLAUDE.md).
+
+</details>
+
+<details>
+<summary>Development</summary>
 
 ```bash
 .venv/bin/python -m pytest -q -p no:logging --cov=custom_components/ring_plus   # fake Ring cloud in tests/common.py
@@ -206,8 +203,12 @@ uvx mypy@2.3.1 --python-executable .venv/bin/python
 .venv/bin/python tools/pruefe-uebersetzungen.py    # strings.json against translations/*.json
 ```
 
-Install the test requirements with `pip install -r requirements_test.txt`. The tests never talk to Ring. The same checks run on GitHub Actions for every push and pull request, plus HACS validation and hassfest. Self-assessed state of the [Integration Quality Scale](https://developers.home-assistant.io/docs/core/integration-quality-scale/): [`quality_scale.yaml`](custom_components/ring_plus/quality_scale.yaml).
+Test requirements: `pip install -r requirements_test.txt`. The tests never talk to Ring; they also run against the real Ring integration of Home Assistant. GitHub Actions runs the same checks plus HACS validation and hassfest. Quality scale: silver, [self-assessed](custom_components/ring_plus/quality_scale.yaml).
+
+</details>
 
 ## License
 
-[Apache License 2.0](LICENSE), Copyright 2026 SH1FT-W. See [`NOTICE`](NOTICE) for acknowledgements and trademarks.
+[Apache License 2.0](LICENSE). Copyright 2026 SH1FT-W. Acknowledgements in [`NOTICE`](NOTICE).
+
+<sub>Ring Intercom Plus is an independent project, not affiliated with, endorsed or sponsored by Ring LLC or Amazon. Ring is a trademark of Ring LLC or its affiliates.</sub>

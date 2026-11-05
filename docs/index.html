@@ -158,6 +158,8 @@ section.tint { background: var(--bg-2); }
 .tbl th, .tbl td { text-align: left; padding: 14px 18px; border-top: 1px solid var(--line); vertical-align: top; }
 .tbl thead th { border-top: 0; font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--accent-ink); background: var(--card-2); }
 .tbl td:first-child { font-weight: 600; white-space: nowrap; }
+.tbl.core td:first-child { white-space: normal; }
+.tbl.core th:not(:first-child), .tbl.core td:not(:first-child) { text-align: center; width: 26%; color: var(--accent-ink); font-weight: 600; }
 .tbl code { font-size: 13px; background: var(--chip); padding: 2px 6px; border-radius: 6px; overflow-wrap: anywhere; }
 .tbl td:last-child { color: var(--ink-2); }
 
@@ -237,6 +239,9 @@ footer .fine { flex-basis: 100%; line-height: 1.6; }
   .tbl tr { border-top: 1px solid var(--line); padding: 12px 16px; }
   .tbl tr:first-child { border-top: 0; }
   .tbl td { border: 0; padding: 2px 0; }
+  .tbl.core { display: table; font-size: 14px; } .tbl.core thead { display: table-header-group; } .tbl.core tbody { display: table-row-group; }
+  .tbl.core tr { display: table-row; padding: 0; } .tbl.core th, .tbl.core td { display: table-cell; padding: 10px; border-top: 1px solid var(--line); }
+  .tbl.core thead th { border-top: 0; font-size: 11px; letter-spacing: 0.02em; }
   .tbl td:first-child { white-space: normal; }
 }
 </style>
@@ -249,6 +254,7 @@ footer .fine { flex-basis: 100%; line-height: 1.6; }
     <a class="brand" href="#top"><img src="logo.png" alt="">Ring Intercom Plus</a>
     <div class="nav-links">
       <a href="#features"><span class="en">Features</span><span class="de">Funktionen</span></a>
+      <a href="#compare" class="opt"><span class="en">Compared</span><span class="de">Vergleich</span></a>
       <a href="#safety"><span class="en">Safety</span><span class="de">Sicherheit</span></a>
       <a href="#install"><span class="en">Setup</span><span class="de">Einrichtung</span></a>
       <a href="#faq" class="opt"><span class="en">Good to know</span><span class="de">Gut zu wissen</span></a>
@@ -299,13 +305,38 @@ footer .fine { flex-basis: 100%; line-height: 1.6; }
       <div class="tile reveal d1"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="10" rx="2"/><path d="M7 12h.01M12 12h.01M17 12h.01"/></svg></div><h3><span class="en">Optional PIN</span><span class="de">Optionale PIN</span></h3><p><span class="en">4 to 8 digits. The lock then opens only with the right code, in dashboards, automations and voice assistants alike.</span><span class="de">4 bis 8 Ziffern. Das Schloss öffnet dann nur mit dem richtigen Code, in Dashboards, Automationen und Sprachassistenten gleichermaßen.</span></p></div>
       <div class="tile reveal d2"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0"/></svg></div><h3><span class="en">Ding and call active</span><span class="de">Klingel und Anruf aktiv</span></h3><p><span class="en">Ding stays on for 20 seconds; call active follows the conversation for up to 3 minutes.</span><span class="de">Die Klingel bleibt 20 Sekunden an; Anruf aktiv folgt dem Gespräch bis zu 3 Minuten.</span></p></div>
       <div class="tile reveal"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/></svg></div><h3><span class="en">Settings of the app</span><span class="de">Einstellungen der App</span></h3><p><span class="en">Ring-to-Open, unlock duration (1 to 10 s, analog systems) and a restart button.</span><span class="de">Ring-to-Open, Öffnungsdauer (1 bis 10 s, analoge Anlagen) und ein Neustart-Knopf.</span></p></div>
-      <div class="tile reveal d1"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></svg></div><h3><span class="en">Uses the Ring integration</span><span class="de">Nutzt die Ring-Integration</span></h3><p><span class="en">No second login, no second push connection: rings and unlocks come from its event entities.</span><span class="de">Keine zweite Anmeldung, keine zweite Push-Verbindung: Klingeln und Entsperren kommen aus ihren Ereignis-Entitäten.</span></p></div>
+      <div class="tile reveal d1"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div><h3><span class="en">Last opened</span><span class="de">Zuletzt geöffnet</span></h3><p><span class="en">When the door was last opened and how: Home Assistant with the user, the Ring app, Next ring opens or the Ring history.</span><span class="de">Wann die Tür zuletzt geöffnet wurde und wie: Home Assistant mit Benutzer, die Ring-App, Nächstes Klingeln öffnet oder der Ring-Verlauf.</span></p></div>
+
       <div class="tile reveal d2"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 2h6M10 2v6L4 20a1.5 1.5 0 0 0 1.3 2h13.4A1.5 1.5 0 0 0 20 20L14 8V2"/></svg></div><h3><span class="en">Next ring opens</span><span class="de">Nächstes Klingeln öffnet</span></h3><p><span class="en">Experimental: the next ring within 60 seconds opens the door, or within a time window of up to 8 hours, or while a schedule is on.</span><span class="de">Experimentell: das nächste Klingeln innerhalb von 60 Sekunden öffnet die Tür, oder in einem Zeitfenster bis 8 Stunden, oder solange ein Zeitplan an ist.</span></p></div>
     </div>
+    <p class="cap reveal"><span class="en"><b>New in 26.11:</b> Next ring opens with a time window of up to 8 hours or a schedule, and a Last opened sensor (in beta 26.11.2b1). Every change in the <a href="https://github.com/SH1FT-W/ring-intercom-plus/blob/main/CHANGELOG.md">changelog</a>.</span><span class="de"><b>Neu in 26.11:</b> Nächstes Klingeln öffnet mit Zeitfenster bis 8 Stunden oder Zeitplan, und ein Sensor Zuletzt geöffnet (in der Beta 26.11.2b1). Alle Änderungen im <a href="https://github.com/SH1FT-W/ring-intercom-plus/blob/main/CHANGELOG.md">Changelog</a>.</span></p>
   </div>
 </section>
 
-<section id="safety">
+<section id="compare">
+  <div class="wrap narrow">
+    <div class="head center reveal">
+      <p class="eyebrow"><span class="en">Next to Ring</span><span class="de">Neben Ring</span></p>
+      <h2><span class="en">What it adds to<br>the Ring integration.</span><span class="de">Was sie der<br>Ring-Integration hinzufügt.</span></h2>
+    </div>
+    <div class="reveal">
+      <table class="tbl core">
+        <thead><tr><th></th><th><span class="en">Ring integration</span><span class="de">Ring-Integration</span></th><th><span class="en">With Ring Intercom Plus</span><span class="de">Mit Ring Intercom Plus</span></th></tr></thead>
+        <tbody>
+          <tr><td><span class="en">Login to the Ring account</span><span class="de">Anmeldung beim Ring-Konto</span></td><td>&check;</td><td><span class="en">uses Ring's</span><span class="de">nutzt die von Ring</span></td></tr>
+          <tr><td><span class="en">Ring and unlock events</span><span class="de">Ereignisse Klingeln und Entsperren</span></td><td>&check;</td><td>&check;</td></tr>
+          <tr><td><span class="en">Open the door</span><span class="de">Tür öffnen</span></td><td><span class="en">button</span><span class="de">Knopf</span></td><td><span class="en">lock with optional PIN</span><span class="de">Schloss mit optionaler PIN</span></td></tr>
+          <tr><td><span class="en">Ding sensor, call active, last opened</span><span class="de">Klingel-Sensor, Anruf aktiv, zuletzt geöffnet</span></td><td></td><td>&check;</td></tr>
+          <tr><td><span class="en">Next ring opens (experimental)</span><span class="de">Nächstes Klingeln öffnet (experimentell)</span></td><td></td><td>&check;</td></tr>
+          <tr><td><span class="en">Ring-to-Open, unlock duration, restart</span><span class="de">Ring-to-Open, Öffnungsdauer, Neustart</span></td><td></td><td>&check;</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="cap reveal"><span class="en">No second login and no second push connection: rings and unlocks come from the event entities of the Ring integration.</span><span class="de">Keine zweite Anmeldung und keine zweite Push-Verbindung: Klingeln und Entsperren kommen aus den Ereignis-Entitäten der Ring-Integration.</span></p>
+  </div>
+</section>
+
+<section id="safety" class="tint">
   <div class="wrap narrow">
     <div class="head center reveal">
       <p class="eyebrow"><span class="en">Before you start</span><span class="de">Bevor du anfängst</span></p>
@@ -318,7 +349,7 @@ footer .fine { flex-basis: 100%; line-height: 1.6; }
   </div>
 </section>
 
-<section id="install" class="tint">
+<section id="install">
   <div class="wrap">
     <div class="head center reveal">
       <p class="eyebrow"><span class="en">Install</span><span class="de">Installation</span></p>
@@ -360,7 +391,7 @@ footer .fine { flex-basis: 100%; line-height: 1.6; }
   </div>
 </section>
 
-<section id="faq">
+<section id="faq" class="tint">
   <div class="wrap narrow">
     <div class="head center reveal">
       <p class="eyebrow"><span class="en">Good to know</span><span class="de">Gut zu wissen</span></p>

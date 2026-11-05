@@ -57,8 +57,7 @@ Versions-Badge im README und die Versionszeile der Projektseite (`docs/index.htm
 - GitHub Actions `.github/workflows/pruefung.yml`: dasselbe bei Push/PR auf main, montags zusätzlich gegen die
   neueste HA, plus hassfest; Abdeckungsgrenze 95 %. `.github/workflows/hacs.yml`: HACS-Validierung.
 - `tools/next-version` und `tools/pruefe-uebersetzungen.py` sind byteidentische Kopien der gemeinsamen Vorlagen.
-- README-Bilder: Titelbild und Karten aus `docs/readme-images.json` mit `theme/v1/readme-images/render.mjs <repo>`
+- README-Bilder: Titelbild aus `docs/readme-images.json` mit `theme/v1/readme-images/render.mjs <repo>`
   aus sh1ft-w.github.io: Titel als `docs/images/readme-title-{light,dark}.webp` (2560 × 1280, Fenster zeigt
   `docs/images/title-shot-*.png`, den Funktionsblock der Projektseite mit 2× aufgenommen) plus `readme-title-social.png`
-  für die GitHub-Vorschau; die Karten stehen als Markdown-Tabellen zwischen `<!-- cards:… -->` im README, Icons in
-  `docs/images/icons/`. Die Projektseite zeigt das Titelbild im Hero.
+  für die GitHub-Vorschau; README-Aufbau nach `repo-vorlagen/readme-muster.md`, ohne Kartentabellen. Die Projektseite zeigt das Titelbild im Hero.

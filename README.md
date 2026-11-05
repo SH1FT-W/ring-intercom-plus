@@ -2,7 +2,7 @@
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/images/readme-title-dark.webp" />
-  <img src="docs/images/readme-title-light.webp" alt="Ring Intercom Plus: Your Ring Intercom, with the missing switches. The feature overview of the project page in a window." />
+  <img src="docs/images/readme-title-light.webp" alt="Ring Intercom Plus: Your Ring Intercom, with the missing switches." />
 </picture>
 
 [![Version](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2FSH1FT-W%2Fring-intercom-plus%2Fmain%2Fcustom_components%2Fring_plus%2Fmanifest.json&query=%24.version&label=version&style=flat-square&color=1998D5&labelColor=111111)](https://github.com/SH1FT-W/ring-intercom-plus/releases/latest)

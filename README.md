@@ -2,14 +2,14 @@
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/images/readme-title-dark.webp" />
-  <img src="docs/images/readme-title-light.webp" alt="Ring Intercom Plus: Your Ring Intercom, with the missing switches." />
+  <img src="docs/images/readme-title-light.webp" alt="Ring Intercom Plus: extra controls for the Ring Intercom. Door opener with PIN. Ring-to-Open. Adds to the Ring integration." />
 </picture>
 
 [![Version](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2FSH1FT-W%2Fring-intercom-plus%2Fmain%2Fcustom_components%2Fring_plus%2Fmanifest.json&query=%24.version&label=version&style=flat-square&color=1998D5&labelColor=111111)](https://github.com/SH1FT-W/ring-intercom-plus/releases/latest)
 [![Home Assistant](https://img.shields.io/badge/Home%20Assistant-2026.9%2B-1998D5?style=flat-square&labelColor=111111&logo=homeassistant&logoColor=white)](https://www.home-assistant.io)
 [![Marketplace](https://img.shields.io/badge/Marketplace-custom%20repository-1998D5?style=flat-square&labelColor=111111)](https://hacs.xyz)
 
-<a href="https://sh1ft-w.github.io/ring-intercom-plus"><b>Website</b></a>&emsp;<a href="#install">Install</a>&emsp;<a href="#set-up">Set up</a>&emsp;<a href="#entities">Entities</a>&emsp;<a href="#next-ring-opens">Next ring opens</a>&emsp;<a href="CHANGELOG.md">Changelog</a>
+<a href="https://sh1ft-w.github.io/ring-intercom-plus"><b>Website</b></a>&emsp;<a href="#get-started">Get started</a>&emsp;<a href="#entities">Entities</a>&emsp;<a href="#next-ring-opens">Next ring opens</a>&emsp;<a href="CHANGELOG.md">Changelog</a>
 
 </div>
 
@@ -22,7 +22,7 @@ Everything goes through the Ring cloud, using the requests the Ring app sends. R
 > [!WARNING]
 > **The door opener opens a real door.** Without a PIN it does so on every `lock.unlock` call: voice assistants, dashboards, automations, scripts and anyone with access to your Home Assistant. Set a PIN in the options and do not expose the lock to voice assistants if you do not want that.
 
-## What it adds to the Ring integration
+## What you get
 
 |  | Ring integration | With Ring Intercom Plus |
 |:--|:--:|:--:|
@@ -35,10 +35,17 @@ Everything goes through the Ring cloud, using the requests the Ring app sends. R
 
 **New in 26.11:** Next ring opens with a time window of up to 8 hours or a schedule, and a Last opened sensor (in beta 26.11.2b1). Every change is in the [changelog](CHANGELOG.md).
 
-<a id="install"></a>
-## Install
+<a id="get-started"></a><a id="install"></a><a id="set-up"></a>
+## Get started
 
-Ring Intercom Plus is a custom repository. Under **Settings > Marketplace** (called HACS before Home Assistant 2026.11), open the three dots menu, choose **Custom repositories** and add `https://github.com/SH1FT-W/ring-intercom-plus` with the type **Integration**. Then search for **Ring Intercom Plus**, download it and restart Home Assistant.
+The **official Ring integration** must be set up and show the intercom as a device, with its event entities for ding and intercom unlock enabled.
+
+1. **Install it.** Ring Intercom Plus is a custom repository. Under **Settings > Marketplace** (called HACS before Home Assistant 2026.11), open the three dots menu, choose **Custom repositories** and add `https://github.com/SH1FT-W/ring-intercom-plus` with the type **Integration**. Then search for **Ring Intercom Plus**, download it and restart Home Assistant.
+2. **Add the integration.** **Settings > Devices & services > Add integration > Ring Intercom Plus.** It finds the Ring integration and its intercoms by itself; without Ring the setup stops with a message.
+3. **Set a PIN** (recommended). **Configure > PIN for the door opener**, 4 to 8 digits. From then on the lock opens only with the right code, in dashboards, automations and voice assistants alike. Leave the field empty to remove it.
+4. **Pick a schedule** (optional). **Configure > Schedule for "Next ring opens"**, see [below](#next-ring-opens).
+
+The entities sit on the intercom's device of the Ring integration. Coming from ring-mqtt, you can rename them to your old entity IDs; automations and dashboards then keep working.
 
 <details>
 <summary>Install by hand</summary>
@@ -47,17 +54,6 @@ Ring Intercom Plus is a custom repository. Under **Settings > Marketplace** (cal
 2. Copy `custom_components/ring_plus` into `/config/custom_components/` and restart Home Assistant.
 
 </details>
-
-<a id="set-up"></a>
-## Set up
-
-The **official Ring integration** must be set up and show the intercom as a device, with its event entities for ding and intercom unlock enabled.
-
-1. **Add the integration.** **Settings > Devices & services > Add integration > Ring Intercom Plus.** It finds the Ring integration and its intercoms by itself; without Ring the setup stops with a message.
-2. **Set a PIN** (recommended). **Configure > PIN for the door opener**, 4 to 8 digits. From then on the lock opens only with the right code, in dashboards, automations and voice assistants alike. Leave the field empty to remove it.
-3. **Pick a schedule** (optional). **Configure > Schedule for "Next ring opens"**, see [below](#next-ring-opens).
-
-The entities sit on the intercom's device of the Ring integration. Coming from ring-mqtt, you can rename them to your old entity IDs; automations and dashboards then keep working.
 
 <a id="entities"></a>
 ## Entities
@@ -212,3 +208,11 @@ Test requirements: `pip install -r requirements_test.txt`. The tests never talk 
 [Apache License 2.0](LICENSE). Copyright 2026 SH1FT-W. Acknowledgements in [`NOTICE`](NOTICE).
 
 <sub>Ring Intercom Plus is an independent project, not affiliated with, endorsed or sponsored by Ring LLC or Amazon. Ring is a trademark of Ring LLC or its affiliates.</sub>
+
+<br/>
+
+<div align="center">
+<a href="https://sh1ft-w.github.io"><img src="https://sh1ft-w.github.io/readme/footer.png" width="640" alt="All SH1FT-W projects"></a>
+<br/>
+<sub>More open source for Home Assistant and the Mac at <a href="https://sh1ft-w.github.io">sh1ft-w.github.io</a></sub>
+</div>

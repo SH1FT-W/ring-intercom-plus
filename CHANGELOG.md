@@ -1,6 +1,6 @@
 # Changelog
 
-## 26.11.2 – 02.11.2026
+## 26.11.2 – 11.11.2026
 
 - **Next ring opens with a time window:** new number "Next ring opens: time window" (1 to 480 minutes) and action `ring_plus.next_ring_opens` with an optional `duration`. 1 minute stays the default and works as before (the intercom's own 60 seconds). Longer windows are handled by Home Assistant: it opens the door when the next ring arrives by push, then the switch turns off. A ring seen only later through "Last activity" never opens the door. The window survives restarts and is never longer than 8 hours.
 - **Schedule for Next ring opens (optional):** pick a schedule helper in the options. While it is on, every ring that arrives by push opens the door. Switching "Next ring opens" off pauses the schedule until it turns off, also across restarts.

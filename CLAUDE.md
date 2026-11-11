@@ -5,7 +5,7 @@ HA-Integration (`custom_components/ring_plus`, Domain `ring_plus`) mit Zusatzfun
 Ergänzt die offizielle HA-Integration `ring` und nutzt deren Anmeldung; kann die Intercom-Funktionen von ring-mqtt
 ersetzen. An echter Hardware geprüft: Ring Intercom (Audio).
 
-- Repo wird **öffentlich**: nichts Persönliches ins Repo (keine Namen, echten Entity-IDs, Geräte-/Profil-IDs,
+- Repo ist **öffentlich** (SH1FT-W/ring-intercom-plus): nichts Persönliches ins Repo (keine Namen, echten Entity-IDs, Geräte-/Profil-IDs,
   Seriennummern, Heimnetz-Details, lokalen Pfade). Testdaten bleiben fiktiv (Geräte-ID `123456`, Profil-ID `98765`,
   MAC `aa:bb:cc:dd:ee:ff`, Gerät „Front Door“).
 - README, CHANGELOG, Release-Notizen, Issue-Texte und Commit-Texte auf Englisch.

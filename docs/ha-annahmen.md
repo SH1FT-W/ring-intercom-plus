@@ -6,7 +6,7 @@
 
 Worauf sich dieses Repo bei Home Assistant verlässt. Bei jeder Änderung am Code mitpflegen.
 
-**Getestet mit:** HA 2026.9.3 (ring-doorbell 0.9.14) · **Mindestversion:** 2026.9.0 (`hacs.json`)
+**Getestet mit:** HA 2026.9.3 (ring-doorbell 0.9.14), zuletzt auch HA 2026.11.2 (20.11.2026, ring-doorbell unverändert 0.9.14, nur Fremdwarnungen) · **Mindestversion:** 2026.9.0 (`hacs.json`)
 
 `tests/test_ha_ring.py` richtet die **echte** HA-Ring-Integration der installierten HA-Version ein (nur das Netz
 unter `ring_doorbell.Auth` und der Push-Empfänger sind gefälscht) und lädt Ring Intercom Plus darauf. Die übrigen

@@ -33,7 +33,7 @@ Everything goes through the Ring cloud, using the requests the Ring app sends. R
 | Next ring opens (experimental) | | ✓ |
 | Ring-to-Open, unlock duration, restart | | ✓ |
 
-**New in 26.11:** Next ring opens with a time window of up to 8 hours or a schedule, and a Last opened sensor (in beta 26.11.2b1). Every change is in the [changelog](CHANGELOG.md).
+**New in 26.11:** Next ring opens with a time window of up to 8 hours or a schedule, and a Last opened sensor (26.11.2). Every change is in the [changelog](CHANGELOG.md).
 
 <a id="get-started"></a><a id="install"></a><a id="set-up"></a>
 ## Get started
